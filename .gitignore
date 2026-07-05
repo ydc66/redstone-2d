@@ -1,6 +1,9 @@
 .my-forge/
 docs/requirements/
 docs/architecture/
+docs/my-exp/
+docs/ex-architecture/
+.res/
 
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------

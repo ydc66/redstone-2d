@@ -10,7 +10,20 @@ qt_add_executable(redstone-2d
     main.cpp
     mainwindow.cpp
     mainwindow.h
-    mainwindow.ui
+
+    ui/SideBar.cpp
+    ui/SideBar.h
+    ui/MenuBar.cpp
+    ui/MenuBar.h
+
+    ui/pages/WelcomePage.cpp
+    ui/pages/WelcomePage.h
+    ui/pages/DesignPage.cpp
+    ui/pages/DesignPage.h
+    ui/pages/HelpPage.cpp
+    ui/pages/HelpPage.h
+    ui/pages/SettingsPage.cpp
+    ui/pages/SettingsPage.h
 )
 
 target_link_libraries(redstone-2d
