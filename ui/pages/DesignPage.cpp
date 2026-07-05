@@ -1,7 +1,12 @@
 #include "DesignPage.h"
 
-#include <QLabel>
+#include <QTabBar>
+#include <QSplitter>
 #include <QVBoxLayout>
+
+#include "design_page/ComponentPanel.h"
+#include "design_page/SimControlPanel.h"
+#include "design_page/EditCanvas.h"
 
 /**
  * @brief   构建设计页面
@@ -9,12 +14,60 @@
  */
 DesignPage::DesignPage(QWidget *parent)
     : QWidget(parent)
+    , m_tabBar(nullptr)
+    , m_splitter(nullptr)
+    , m_componentPanel(nullptr)
+    , m_simControlPanel(nullptr)
+    , m_editCanvas(nullptr)
 {
-    auto *layout = new QVBoxLayout(this);
-    layout->setAlignment(Qt::AlignCenter);
+    setupUI();
+}
 
-    auto *label = new QLabel(QStringLiteral("设计页面（电路编辑区域）"), this);
-    label->setStyleSheet("font-size: 18px; color: #999;");
+void DesignPage::setupUI()
+{
+    auto *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    layout->addWidget(label);
+    // ─── 顶部标签栏 ───
+    // 类似编辑器的文件标签，支持动态增删、拖拽移动、关闭按钮
+    m_tabBar = new QTabBar(this);
+    m_tabBar->setExpanding(false);
+    m_tabBar->setTabsClosable(true);
+    m_tabBar->setMovable(true);
+    m_tabBar->setElideMode(Qt::ElideRight);
+    m_tabBar->setUsesScrollButtons(true);
+    // 默认添加一个标签
+    m_tabBar->addTab(QStringLiteral("电路 1"));
+    mainLayout->addWidget(m_tabBar);
+
+    // ─── 主体分栏 ───
+    m_splitter = new QSplitter(Qt::Horizontal, this);
+    m_splitter->setHandleWidth(4);
+    m_splitter->setChildrenCollapsible(false);
+
+    // ─── 左侧面板（元件选择 + 仿真控制） ───
+    auto *leftPanel = new QWidget(this);
+    auto *leftLayout = new QVBoxLayout(leftPanel);
+    leftLayout->setContentsMargins(8, 8, 8, 8);
+    leftLayout->setSpacing(12);
+
+    m_componentPanel = new ComponentPanel(leftPanel);
+    m_simControlPanel = new SimControlPanel(leftPanel);
+
+    leftLayout->addWidget(m_componentPanel, 1);   // 元件面板占满剩余空间
+    leftLayout->addWidget(m_simControlPanel);      // 仿真控制固定在底部
+
+    leftPanel->setMinimumWidth(240);
+    leftPanel->setMaximumWidth(350);
+    m_splitter->addWidget(leftPanel);
+
+    // ─── 右侧画布 ───
+    m_editCanvas = new EditCanvas(this);
+    m_splitter->addWidget(m_editCanvas);
+
+    // QSplitter 默认比例：左侧 ~250px，右侧占满剩余
+    m_splitter->setSizes({250, 800});
+
+    mainLayout->addWidget(m_splitter, 1);
 }

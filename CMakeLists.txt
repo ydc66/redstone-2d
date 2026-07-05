@@ -24,6 +24,13 @@ qt_add_executable(redstone-2d
     ui/pages/HelpPage.h
     ui/pages/SettingsPage.cpp
     ui/pages/SettingsPage.h
+
+    ui/pages/design_page/ComponentPanel.cpp
+    ui/pages/design_page/ComponentPanel.h
+    ui/pages/design_page/SimControlPanel.cpp
+    ui/pages/design_page/SimControlPanel.h
+    ui/pages/design_page/EditCanvas.cpp
+    ui/pages/design_page/EditCanvas.h
 )
 
 target_link_libraries(redstone-2d
@@ -31,6 +38,10 @@ target_link_libraries(redstone-2d
         Qt::Core
         Qt::Widgets
 )
+
+# 等价于 WIN32：不显示控制台窗口
+target_link_options(redstone-2d PRIVATE "-Wl,--subsystem,windows")
+
 
 install(TARGETS redstone-2d
     BUNDLE  DESTINATION .
