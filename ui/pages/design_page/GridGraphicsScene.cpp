@@ -6,7 +6,7 @@
 
 #include "GridGraphicsScene.h"
 
-#include "core/GridModel.h"
+#include "core/model/GridModel.h"
 #include "core/Component.h"
 
 #include <QPainter>
