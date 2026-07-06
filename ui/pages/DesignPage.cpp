@@ -7,6 +7,11 @@
 #include "design_page/ComponentPanel.h"
 #include "design_page/SimControlPanel.h"
 #include "design_page/EditCanvas.h"
+#include "design_page/GridGraphicsScene.h"
+#include "design_page/ModeButtonGroup.h"
+#include "design_page/InteractionManager.h"
+
+#include "core/model/GridModel.h"
 
 /**
  * @brief   构建设计页面
@@ -19,8 +24,15 @@ DesignPage::DesignPage(QWidget *parent)
     , m_componentPanel(nullptr)
     , m_simControlPanel(nullptr)
     , m_editCanvas(nullptr)
+    , m_modeGroup(nullptr)
+    , m_interactionMgr(nullptr)
 {
+    // 先创建网格模型（画布初始化时需要）
+    m_gridModel = std::make_unique<GridModel>();
+    m_gridModel->resize(16, 16);
+
     setupUI();
+    initGridModel();
 }
 
 void DesignPage::setupUI()
@@ -52,6 +64,10 @@ void DesignPage::setupUI()
     leftLayout->setContentsMargins(8, 8, 8, 8);
     leftLayout->setSpacing(12);
 
+    // ─── 操作模式切换（放在最顶部） ───
+    m_modeGroup = new ModeButtonGroup(leftPanel);
+    leftLayout->addWidget(m_modeGroup);
+
     m_componentPanel = new ComponentPanel(leftPanel);
     m_simControlPanel = new SimControlPanel(leftPanel);
 
@@ -63,11 +79,24 @@ void DesignPage::setupUI()
     m_splitter->addWidget(leftPanel);
 
     // ─── 右侧画布 ───
-    m_editCanvas = new EditCanvas(this);
+    m_editCanvas = new EditCanvas(m_gridModel.get(), this);
     m_splitter->addWidget(m_editCanvas);
 
     // QSplitter 默认比例：左侧 ~250px，右侧占满剩余
     m_splitter->setSizes({250, 800});
 
     mainLayout->addWidget(m_splitter, 1);
+}
+
+void DesignPage::initGridModel()
+{
+    // ─── 初始化交互管理器 ───
+    if (auto *gridScene = m_editCanvas->scene()) {
+        m_interactionMgr = new InteractionManager(
+            m_editCanvas->view(), m_gridModel.get(), gridScene, this);
+        m_interactionMgr->install();
+
+        connect(m_modeGroup, &ModeButtonGroup::modeChanged,
+                m_interactionMgr, &InteractionManager::setMode);
+    }
 }

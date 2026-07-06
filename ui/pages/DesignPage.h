@@ -2,6 +2,9 @@
 #define DESIGNPAGE_H
 
 #include <QWidget>
+#include <memory>
+
+#include "core/model/GridModel.h"
 
 class QTabBar;
 class QSplitter;
@@ -9,6 +12,8 @@ class QSplitter;
 class ComponentPanel;
 class SimControlPanel;
 class EditCanvas;
+class InteractionManager;
+class ModeButtonGroup;
 
 /**
  * @class   DesignPage
@@ -29,12 +34,18 @@ public:
 
 private:
     void setupUI();
+    void initGridModel();
+
+    std::unique_ptr<GridModel> m_gridModel;
 
     QTabBar         *m_tabBar;
     QSplitter       *m_splitter;
     ComponentPanel  *m_componentPanel;
     SimControlPanel *m_simControlPanel;
     EditCanvas      *m_editCanvas;
+
+    ModeButtonGroup     *m_modeGroup;
+    InteractionManager  *m_interactionMgr;
 };
 
 #endif // DESIGNPAGE_H
