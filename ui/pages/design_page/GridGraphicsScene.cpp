@@ -7,7 +7,7 @@
 #include "GridGraphicsScene.h"
 
 #include "core/model/GridModel.h"
-#include "core/Component.h"
+#include "core/types/Component.h"
 
 #include <QPainter>
 #include <QColor>
@@ -99,7 +99,7 @@ void GridGraphicsScene::drawComponents(QPainter *painter, const QRectF &rect)
     for (int x = startX; x <= endX; ++x) {
         for (int y = startY; y <= endY; ++y) {
             auto *comp = m_gridModel->cellAt(x, y);
-            if (!comp || comp->isDefault())
+            if (!comp)
                 continue;  // 跳过 Air
 
             painter->save();
