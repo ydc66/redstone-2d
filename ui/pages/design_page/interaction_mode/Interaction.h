@@ -10,6 +10,7 @@ class GridModel;
 class GridGraphicsScene;
 class QGraphicsView;
 class QKeyEvent;
+class QWheelEvent;
 
 /**
  * @brief 交互模式策略基类
@@ -36,6 +37,9 @@ public:
 
     // ─── 键盘事件 ───
     virtual void onKeyPress(QKeyEvent *event);
+
+    // ─── 滚轮事件 ───
+    virtual void onWheel(QWheelEvent *event);
 
     // ─── 生命周期 ───
     virtual void onActivate();    /// 切换到该模式时调用

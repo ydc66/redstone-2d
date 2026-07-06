@@ -1,9 +1,9 @@
 #pragma once
 
 /**
- * @brief DesignPage 的 5 种操作模式
+ * @brief DesignPage 的操作模式
  *
- * 通过 ModeButtonGroup 切换，由 InteractionManager 根据当前模式路由事件。
+ * 枚举值个数由 Count 自动维护。新增模式时在 Count 前加一项即可。
  */
 enum class InteractionMode
 {

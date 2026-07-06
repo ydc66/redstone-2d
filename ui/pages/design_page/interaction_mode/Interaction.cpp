@@ -9,6 +9,7 @@
 
 #include <QGraphicsView>
 #include <QKeyEvent>
+#include <QWheelEvent>
 
 Interaction::Interaction(GridModel *grid, GridGraphicsScene *scene,
                          QGraphicsView *view, QObject *parent)
@@ -24,6 +25,7 @@ void Interaction::onLeftPress(const QPointF &) {}
 void Interaction::onLeftMove(const QPointF &) {}
 void Interaction::onLeftRelease(const QPointF &) {}
 void Interaction::onKeyPress(QKeyEvent *) {}
+void Interaction::onWheel(QWheelEvent *) {}
 void Interaction::onActivate() {}
 void Interaction::onDeactivate() {}
 
