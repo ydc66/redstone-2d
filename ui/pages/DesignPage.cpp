@@ -124,4 +124,11 @@ void DesignPage::initGridModel()
 
     connect(m_world.get(), &World::tickCompleted,
             m_simControlPanel, &SimControlPanel::onTickCountChanged);
+
+    // Tick 完成后刷新画布
+    connect(m_world.get(), &World::tickCompleted,
+            this, [this](int) {
+        if (auto *scene = m_editCanvas->scene())
+            scene->invalidate();
+    });
 }
