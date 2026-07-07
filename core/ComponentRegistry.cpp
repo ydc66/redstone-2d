@@ -105,7 +105,10 @@ ComponentRegistry::create(const QString &id, int x, int y) const
     auto it = m_idToIndex.find(id);
     if (it == m_idToIndex.end())
         return nullptr;          // 未注册的类型
-    return m_entries[it.value()].factory(x, y);
+    auto comp = m_entries[it.value()].factory(x, y);
+    if (comp)
+        comp->setRegistryId(id);
+    return comp;
 }
 
 std::unique_ptr<Component>
