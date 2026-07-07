@@ -2,6 +2,7 @@
 
 #include "interaction_mode/InteractionMode.h"
 #include "interaction_mode/Interaction.h"
+#include "interaction_mode/PlaceInteraction.h"
 
 #include <QObject>
 
@@ -35,6 +36,12 @@ public:
 
     /// 当前模式
     InteractionMode currentMode() const { return m_currentMode; }
+
+    /// 获取 PlaceInteraction 实例（DesignPage 连接信号用）
+    PlaceInteraction *placeInteraction() const {
+        return static_cast<PlaceInteraction *>(
+            m_interactions[static_cast<int>(InteractionMode::Place)]);
+    }
 
 public slots:
     /// 切换模式

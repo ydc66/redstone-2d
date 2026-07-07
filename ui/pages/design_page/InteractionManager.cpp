@@ -7,9 +7,13 @@
 
 #include "interaction_mode/ViewInteraction.h"
 #include "interaction_mode/SelectInteraction.h"
-#include "interaction_mode/PlaceInteraction.h"
 #include "interaction_mode/InteractInteraction.h"
 #include "interaction_mode/DestroyInteraction.h"
+
+#include "core/ComponentRegistry.h"
+#include "core/model/GridModel.h"
+#include "core/types/Component.h"
+#include "ui/pages/design_page/GridGraphicsScene.h"
 
 #include <QGraphicsView>
 #include <QWheelEvent>
@@ -33,6 +37,41 @@ InteractionManager::InteractionManager(QGraphicsView *view,
     m_interactions[static_cast<int>(InteractionMode::Place)]    = new PlaceInteraction(grid, scene, view, this);
     m_interactions[static_cast<int>(InteractionMode::Interact)] = new InteractInteraction(grid, scene, view, this);
     m_interactions[static_cast<int>(InteractionMode::Destroy)]  = new DestroyInteraction(grid, scene, view, this);
+
+    // ─── 放置信号 → 创建元件并放入网格 ───
+    auto *place = static_cast<PlaceInteraction *>(
+        m_interactions[static_cast<int>(InteractionMode::Place)]);
+    connect(place, &PlaceInteraction::placeRequested,
+            this, [this](int x, int y, const QString &id) {
+        auto comp = ComponentRegistry::instance().create(id, x, y);
+        if (comp) {
+            m_grid->placeComponent(x, y, comp.release());
+            m_scene->update();
+        }
+    });
+
+    // ─── 破坏信号 → 从网格移除并释放 ───
+    auto *destroy = static_cast<DestroyInteraction *>(
+        m_interactions[static_cast<int>(InteractionMode::Destroy)]);
+    connect(destroy, &DestroyInteraction::componentDestroyed,
+            this, [this](const QString &/*ignored*/, int x, int y) {
+        auto *comp = m_grid->removeComponentAt(x, y);
+        if (comp) {
+            delete comp;
+            m_scene->update();
+        }
+    });
+
+    // ─── 交互信号 → 委托给元件内部 onInteract() ───
+    auto *interact = static_cast<InteractInteraction *>(
+        m_interactions[static_cast<int>(InteractionMode::Interact)]);
+    connect(interact, &InteractInteraction::interactTriggered,
+            this, [this](const QString &/*id*/, int x, int y) {
+        auto *comp = m_grid->cellAt(x, y);
+        if (!comp) return;
+        comp->onInteract();   // SolidBlockBehavior 会切换材质
+        m_scene->update();
+    });
 }
 
 void InteractionManager::install()

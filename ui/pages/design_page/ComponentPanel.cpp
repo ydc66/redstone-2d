@@ -6,6 +6,8 @@
 
 #include "ComponentPanel.h"
 
+#include "core/ComponentRegistry.h"
+
 #include <QLabel>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
@@ -47,16 +49,26 @@ void ComponentPanel::setupUI()
     m_tree->setAnimated(true);
     m_tree->setRootIsDecorated(true);
 
-    // 添加四个分类（无子项，后续由注册机制注入）
-    auto *catSignal   = new QTreeWidgetItem(m_tree, {QStringLiteral("信号源")});
-    auto *catTrans    = new QTreeWidgetItem(m_tree, {QStringLiteral("传输元件")});
-    auto *catMech     = new QTreeWidgetItem(m_tree, {QStringLiteral("机械元件")});
-    auto *catBlock    = new QTreeWidgetItem(m_tree, {QStringLiteral("纯方块")});
+    // 从注册中心动态加载元件列表
+    auto &registry = ComponentRegistry::instance();
+    for (const auto &cat : registry.categories()) {
+        auto *catItem = new QTreeWidgetItem(m_tree, {cat});
+        catItem->setFlags(Qt::ItemIsEnabled);
 
-    catSignal->setFlags(Qt::ItemIsEnabled);
-    catTrans->setFlags(Qt::ItemIsEnabled);
-    catMech->setFlags(Qt::ItemIsEnabled);
-    catBlock->setFlags(Qt::ItemIsEnabled);
+        for (const auto *meta : registry.defsByCategory(cat)) {
+            auto *item = new QTreeWidgetItem(catItem);
+            item->setText(0, meta->name);
+            item->setData(0, Qt::UserRole, meta->id);
+            item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        }
+    }
+
+    connect(m_tree, &QTreeWidget::itemClicked, this,
+            [this](QTreeWidgetItem *item, int) {
+        if (!item->parent())
+            return;   // 跳过分类标题
+        emit componentSelected(item->data(0, Qt::UserRole).toString());
+    });
 
     layout->addWidget(m_tree, 1);
 }

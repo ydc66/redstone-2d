@@ -10,6 +10,7 @@
 #include "design_page/GridGraphicsScene.h"
 #include "design_page/ModeButtonGroup.h"
 #include "design_page/InteractionManager.h"
+#include "design_page/interaction_mode/PlaceInteraction.h"
 
 #include "core/model/GridModel.h"
 
@@ -95,6 +96,11 @@ void DesignPage::initGridModel()
         m_interactionMgr = new InteractionManager(
             m_editCanvas->view(), m_gridModel.get(), gridScene, this);
         m_interactionMgr->install();
+
+        // ─── 元件面板选择 → 放置模式激活元件 ───
+        connect(m_componentPanel, &ComponentPanel::componentSelected,
+                m_interactionMgr->placeInteraction(),
+                &PlaceInteraction::setActiveComponent);
 
         connect(m_modeGroup, &ModeButtonGroup::modeChanged,
                 m_interactionMgr, &InteractionManager::setMode);
