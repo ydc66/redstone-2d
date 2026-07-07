@@ -1,11 +1,15 @@
 #pragma once
 
+#include <array>
+
 #include "Direction.h"
+#include "core/meta_component/RedstoneSignal.h"
 
 #include <QList>
 #include <QString>
 
 class QPainter;
+class GridModel;
 
 /// 方块类型，决定了物理交互行为
 enum class Category
@@ -55,15 +59,25 @@ public:
 
     // ─── 虚方法：子类按需重写 ───
     virtual void onInteract() {}
-    virtual void onTick() {}
+    /// @param sigArray 预计算的 4 方向信号（引擎 Phase 3 传入）
+    virtual void onTick(const std::array<RedstoneSignal, 4>& sigArray) { (void)sigArray; }
+
+    // ─── 信号系统（仿真引擎用） ───
+    virtual bool isSignalSource()  const { return false; }
+    virtual bool isTransceiver()   const { return false; }
+    virtual bool isConsumer()      const { return false; }
+
+    /// 输出是否为强充能（弱充能不可激活传输元件）
+    virtual bool isStrongOutput()  const { return false; }
+
+    int  outputStrength()    const { return m_outputStrength; }
+    void setOutputStrength(int v)  { m_outputStrength = v; }
+
+    /// Phase 2 BFS：根据邻居信号重新计算自身输出
+    virtual void computeOutput(GridModel *grid);
 
     // ─── 渲染（Template Method：基类处理朝向旋转，子类只画朝北版本） ───
     void paint(QPainter *painter, int cellSize) const;
-
-    // ─── 脏标志（引擎调度用） ───
-    bool isDirty()    const { return m_dirty; }
-    void clearDirty()       { m_dirty = false; }
-    void markDirty()        { m_dirty = true; }
 
     // ─── 注册 ID（关联 ComponentRegistry 中的 entry） ───
     const QString& registryId() const { return m_registryId; }
@@ -80,8 +94,9 @@ private:
     int             m_x, m_y;
     QString         m_registryId;
     Direction       m_facing        = Direction::North;
-    bool            m_dirty         = false;
 
     QList<RelDir>   m_inputPorts;
     QList<RelDir>   m_outputPorts;
+
+    int             m_outputStrength  = 0;
 };

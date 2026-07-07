@@ -3,6 +3,15 @@
 #include <QPainter>
 #include <algorithm>
 
+// ═══════════════════════════════════════════════════════════
+//  默认信号实现（无输入输出的普通元件直接忽略）
+// ═══════════════════════════════════════════════════════════
+
+void Component::computeOutput(GridModel *)
+{
+    // 默认：不改变输出
+}
+
 Component::Component(int x, int y,
                      Direction facing,
                      QList<RelDir> inputPorts,
