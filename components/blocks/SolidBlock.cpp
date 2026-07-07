@@ -17,9 +17,7 @@ const SolidBlock::Material SolidBlock::kMaterials[] = {
 // ═══════════════════════════════════════════════════════════
 
 SolidBlock::SolidBlock(int x, int y)
-    : Component(x, y, Direction::North,
-                Category::Solid, false, 0,
-                QList<RelDir>{}, QList<RelDir>{})
+    : Component(x, y)
     , m_currentIdx(0)
 {
 }
@@ -47,13 +45,4 @@ void SolidBlock::paint(QPainter *painter, int cellSize) const
 void SolidBlock::onInteract()
 {
     m_currentIdx = (m_currentIdx + 1) % kMaterialCount;
-}
-
-// ═══════════════════════════════════════════════════════════
-//  工厂函数
-// ═══════════════════════════════════════════════════════════
-
-std::unique_ptr<Component> createSolidBlock(int x, int y)
-{
-    return std::make_unique<SolidBlock>(x, y);
 }

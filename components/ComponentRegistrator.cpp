@@ -3,7 +3,6 @@
 #include "blocks/SolidBlock.h"
 
 #include "core/ComponentRegistry.h"
-#include "core/meta_component/ComponentSpec.h"
 
 void registerComponents()
 {
@@ -12,17 +11,11 @@ void registerComponents()
     once = true;
 
     // ─── 纯方块：实心方块 ───
-    ComponentSpec spec;
-    spec.category       = Category::Solid;
-    spec.isPushable     = false;
-    spec.basePowerLevel = 0;
-
-    ComponentRegistry::instance().registerType(
+    ComponentRegistry::instance().registerType<SolidBlock>(
         QStringLiteral("solid_block"),       // id
         QStringLiteral("实心方块"),           // name
-        QStringLiteral("纯方块"),             // group
-        spec,
-        createSolidBlock);                   // 工厂函数
+        QStringLiteral("纯方块")              // group
+    );
 }
 
 // ═══════════════════════════════════════════════════════════

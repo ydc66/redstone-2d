@@ -7,38 +7,29 @@
 
 ComponentRegistry& ComponentRegistry::instance()
 {
-    static ComponentRegistry reg;  // 首次调用时构造，程序结束时自动析构
+    static ComponentRegistry reg;
     return reg;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  注册元件类型
-// ═══════════════════════════════════════════════════════════
-//  1. 分配 numericId（自增，确保唯一）
-//  2. 填充 Entry（元数据 + 工厂函数）
-//  3. 建立 id → 下标 / numericId → 下标 的双向索引
-//  4. 按注册顺序维护去重的分类列表
+//  注册元件类型（私有，被模板方法调用）
 // ═══════════════════════════════════════════════════════════
 
 void ComponentRegistry::registerType(
     const QString &id, const QString &name,
-    const QString &group, const ComponentSpec &spec,
-    FactoryFunc factory)
+    const QString &group, FactoryFunc factory)
 {
     Entry entry;
-    entry.meta.numericId  = m_nextNumericId++;  // ① 分配并递增
+    entry.meta.numericId  = m_nextNumericId++;
     entry.meta.id         = id;
     entry.meta.name       = name;
     entry.meta.group      = group;
-    entry.meta.spec       = spec;
-    entry.factory         = std::move(factory);  // ② 移动工厂函数，避免拷贝
+    entry.factory         = std::move(factory);
 
-    // ③ 索引：当前 entries.size() 就是新条目的下标（append 前）
     m_idToIndex[id]       = m_entries.size();
     m_numericIdToIndex[entry.meta.numericId] = m_entries.size();
     m_entries.append(std::move(entry));
 
-    // ④ 维护分类列表（去重）：ComponentPanel 按此顺序显示
     if (!m_categoriesInOrder.contains(group)) {
         m_categoriesInOrder.append(group);
     }
@@ -47,16 +38,13 @@ void ComponentRegistry::registerType(
 // ═══════════════════════════════════════════════════════════
 //  查询元数据
 // ═══════════════════════════════════════════════════════════
-//  通过 QMap 直接定位下标，O(1) 复杂度
-//  ⚠️ 返回原始指针，调用方需确保 Registry 生命周期长于指针使用期
-// ═══════════════════════════════════════════════════════════
 
 const ComponentRegistry::ComponentMeta*
 ComponentRegistry::find(const QString &id) const
 {
     auto it = m_idToIndex.find(id);
     if (it == m_idToIndex.end())
-        return nullptr;          // 未注册 → nullptr
+        return nullptr;
     return &m_entries[it.value()].meta;
 }
 
@@ -73,13 +61,11 @@ ComponentRegistry::findByNumericId(int numericId) const
 //  分类查询（供 ComponentPanel 填充树控件）
 // ═══════════════════════════════════════════════════════════
 
-/// 返回所有已注册的分类名（按首次注册的顺序）
 QStringList ComponentRegistry::categories() const
 {
     return m_categoriesInOrder;
 }
 
-/// 查询某个分类下的所有元件元数据
 QList<const ComponentRegistry::ComponentMeta*>
 ComponentRegistry::defsByCategory(const QString &cat) const
 {
@@ -94,17 +80,13 @@ ComponentRegistry::defsByCategory(const QString &cat) const
 // ═══════════════════════════════════════════════════════════
 //  创建元件实例
 // ═══════════════════════════════════════════════════════════
-//  查找到对应的 Entry，调用其工厂函数。(x, y) 作为初始坐标传入。
-//  工厂函数由 registerType 时注册，每种元件类型有自己的创建逻辑
-//  （组装端口列表、创建 Behavior 子类等）
-// ═══════════════════════════════════════════════════════════
 
 std::unique_ptr<Component>
 ComponentRegistry::create(const QString &id, int x, int y) const
 {
     auto it = m_idToIndex.find(id);
     if (it == m_idToIndex.end())
-        return nullptr;          // 未注册的类型
+        return nullptr;
     auto comp = m_entries[it.value()].factory(x, y);
     if (comp)
         comp->setRegistryId(id);

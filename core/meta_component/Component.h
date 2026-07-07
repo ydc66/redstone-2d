@@ -1,26 +1,33 @@
 #pragma once
 
 #include "Direction.h"
-#include "ComponentSpec.h"
 
 #include <QList>
 #include <QString>
 
 class QPainter;
 
+/// 方块类型，决定了物理交互行为
+enum class Category
+{
+    Air,        ///< 空气，不参与任何逻辑
+    Solid,      ///< 实心方块，可被强/弱充能，阻挡信号穿过
+    NonSolid    ///< 非固体（红石线、火把等），信号可穿过
+};
+
 /**
  * @brief 元件抽象基类
  *
  * 集数据与策略于一体，是所有方块/元件的公共基类。
- * 子类必须实现 paint()，可按需重写 onInteract() 和 onTick()。
+ * 子类必须实现 paint() 和 category()，可按需重写 onInteract() / onTick() / isPushable() / basePowerLevel()。
  */
 class Component
 {
 public:
-    Component(int x, int y, Direction facing,
-              Category category, bool isPushable, int basePowerLevel,
-              QList<RelDir> inputPorts,
-              QList<RelDir> outputPorts);
+    Component(int x, int y,
+              Direction facing = Direction::North,
+              QList<RelDir> inputPorts = {},
+              QList<RelDir> outputPorts = {});
 
     virtual ~Component() = default;
 
@@ -32,11 +39,12 @@ public:
     Direction facing()      const { return m_facing; }
     void setFacing(Direction d)    { m_facing = d; }
 
-    // ─── 物理属性 ───
-    Category category()       const { return m_category; }
-    bool isSolid()            const { return m_category == Category::Solid; }
-    bool isPushable()         const { return m_isPushable; }
-    int  basePowerLevel()     const { return m_basePowerLevel; }
+    // ─── 物理属性（子类自声明） ───
+    virtual Category category()         const = 0;
+    virtual bool     isPushable()       const { return false; }
+    virtual int      basePowerLevel()   const { return 0; }
+
+    bool isSolid() const { return category() == Category::Solid; }
 
     // ─── 端口查询 ───
     const QList<RelDir>& inputPorts()  const { return m_inputPorts; }
@@ -63,9 +71,6 @@ private:
     int             m_x, m_y;
     QString         m_registryId;
     Direction       m_facing        = Direction::North;
-    Category        m_category      = Category::Air;
-    bool            m_isPushable    = false;
-    int             m_basePowerLevel = 0;
     bool            m_dirty         = false;
 
     QList<RelDir>   m_inputPorts;

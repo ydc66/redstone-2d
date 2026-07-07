@@ -1,11 +1,10 @@
 #pragma once
 
-#include "meta_component/ComponentSpec.h"
-
 #include <QList>
 #include <QMap>
 #include <QString>
 #include <memory>
+#include <functional>
 
 class Component;
 
@@ -15,17 +14,13 @@ class Component;
  * 职责：
  *   1. 管理所有元件类型的注册表（元数据 + 工厂函数）
  *   2. 提供按字符串 ID（如 "solid_block"）或 numericId 的查询
- *   3. 通过工厂函数创建元件实例
+ *   3. 通过模板方法 registerType<T>() 自动生成工厂函数
  *
  * 数据流：
- *   registerType()  → 注册元件类型
+ *   registerType<T>(id, name, group)  → 注册元件类型
  *         ↓
  *   create(id)      → 调用对应的工厂函数，返回 unique_ptr<Component>
- *   find(id)        → 查询元数据（名称、分组、物理属性等）
- *
- * 索引策略：
- *   使用 QMap 建立 id → 数组下标 和 numericId → 数组下标的映射，
- *   实际数据集中在 QList<Entry> 中，避免多份拷贝。
+ *   find(id)        → 查询元数据（名称、分组）
  */
 class ComponentRegistry
 {
@@ -41,8 +36,7 @@ public:
         int           numericId = -1;   ///< 整数 ID，注册时自动递增（适合网络/存档序列化）
         QString       id;               ///< 字符串 ID，如 "solid_block"（适合代码中引用）
         QString       name;             ///< 显示名称，如 "实心方块"（UI 展示用）
-        QString       group;            ///< UI 分组名，对应 ComponentPanel 中的分类（"信号源" / "传输元件" / "机械元件" / "纯方块"）
-        ComponentSpec spec;             ///< 物理属性（Category、可推动性、基础信号强度）
+        QString       group;            ///< UI 分组名，对应 ComponentPanel 中的分类
     };
 
     /**
@@ -52,18 +46,22 @@ public:
      */
     using FactoryFunc = std::function<std::unique_ptr<Component>(int, int)>;
 
-    // ─── 注册 ───
+    // ─── 模板注册（自动生成工厂 lambda） ───
+    template<typename T>
     void registerType(const QString &id, const QString &name,
-                      const QString &group, const ComponentSpec &spec,
-                      FactoryFunc factory);
+                      const QString &group) {
+        registerType(id, name, group, [](int x, int y) {
+            return std::make_unique<T>(x, y);
+        });
+    }
 
     // ─── 查询元数据（不创建实例） ───
     const ComponentMeta* find(const QString &id) const;
     const ComponentMeta* findByNumericId(int numericId) const;
 
     // ─── 分类查询（ComponentPanel 填充用） ───
-    QStringList categories() const;                                  // 所有分类名（按注册顺序）
-    QList<const ComponentMeta*> defsByCategory(const QString &cat) const;  // 某分类下的所有元件
+    QStringList categories() const;
+    QList<const ComponentMeta*> defsByCategory(const QString &cat) const;
 
     // ─── 工厂创建 ───
     std::unique_ptr<Component> create(const QString &id, int x, int y) const;
@@ -74,6 +72,10 @@ public:
 
 private:
     ComponentRegistry() = default;
+
+    /// 内部注册（接受显式工厂）
+    void registerType(const QString &id, const QString &name,
+                      const QString &group, FactoryFunc factory);
 
     /// 内部条目：元数据 + 工厂函数
     struct Entry
