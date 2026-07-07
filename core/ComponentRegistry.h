@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/ComponentSpec.h"
+#include "meta_component/ComponentSpec.h"
 
 #include <QList>
 #include <QMap>

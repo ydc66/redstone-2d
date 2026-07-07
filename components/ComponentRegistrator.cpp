@@ -3,7 +3,7 @@
 #include "blocks/SolidBlockBehavior.h"
 
 #include "core/ComponentRegistry.h"
-#include "core/types/ComponentSpec.h"
+#include "core/meta_component/ComponentSpec.h"
 
 void registerComponents()
 {

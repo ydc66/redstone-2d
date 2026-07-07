@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Behavior.h"
+#include "behaviors/Behavior.h"
 #include "Direction.h"
 #include "ComponentSpec.h"
 

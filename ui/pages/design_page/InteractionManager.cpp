@@ -12,7 +12,7 @@
 
 #include "core/ComponentRegistry.h"
 #include "core/model/GridModel.h"
-#include "core/types/Component.h"
+#include "core/meta_component/Component.h"
 #include "ui/pages/design_page/GridGraphicsScene.h"
 
 #include <QGraphicsView>

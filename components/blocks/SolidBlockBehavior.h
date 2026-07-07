@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/types/Behavior.h"
-#include "core/types/Component.h"
+#include "core/meta_component/behaviors/Behavior.h"
+#include "core/meta_component/Component.h"
 
 #include <QColor>
 #include <memory>

@@ -1,7 +1,7 @@
 #include "InteractInteraction.h"
 
 #include "core/model/GridModel.h"
-#include "core/types/Component.h"
+#include "core/meta_component/Component.h"
 
 void InteractInteraction::onLeftPress(const QPointF &scenePos)
 {
