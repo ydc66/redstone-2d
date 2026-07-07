@@ -22,7 +22,7 @@ SolidBlock::SolidBlock(int x, int y)
 {
 }
 
-void SolidBlock::paint(QPainter *painter, int cellSize) const
+void SolidBlock::paintContent(QPainter *painter, int cellSize) const
 {
     const auto &mat = kMaterials[m_currentIdx];
 

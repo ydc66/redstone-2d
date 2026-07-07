@@ -19,7 +19,7 @@ public:
 
     Category category() const override { return Category::Solid; }
 
-    void paint(QPainter *painter, int cellSize) const override;
+    void paintContent(QPainter *painter, int cellSize) const override;
     void onInteract() override;
 
 private:

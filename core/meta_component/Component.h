@@ -54,9 +54,11 @@ public:
     bool canOutputTo(Direction absDir)   const;
 
     // ─── 虚方法：子类按需重写 ───
-    virtual void paint(QPainter *painter, int cellSize) const = 0;
     virtual void onInteract() {}
     virtual void onTick() {}
+
+    // ─── 渲染（Template Method：基类处理朝向旋转，子类只画朝北版本） ───
+    void paint(QPainter *painter, int cellSize) const;
 
     // ─── 脏标志（引擎调度用） ───
     bool isDirty()    const { return m_dirty; }
@@ -66,6 +68,13 @@ public:
     // ─── 注册 ID（关联 ComponentRegistry 中的 entry） ───
     const QString& registryId() const { return m_registryId; }
     void setRegistryId(const QString &id) { m_registryId = id; }
+
+protected:
+    /// 子类实现此方法，按朝北方向绘制元件。基类 paint() 会根据 m_facing 旋转画布后再调用此方法。
+    virtual void paintContent(QPainter *painter, int cellSize) const = 0;
+
+    /// 朝向 → 旋转角度（顺时针），用于 paint() 中的画布旋转
+    static int directionToAngle(Direction d) noexcept;
 
 private:
     int             m_x, m_y;
