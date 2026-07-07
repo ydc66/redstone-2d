@@ -1,5 +1,7 @@
 #include "GridModel.h"
 
+#include "core/meta_component/Component.h"
+
 // ─── GridModel ───
 
 GridModel::GridModel()
@@ -44,4 +46,29 @@ Component* GridModel::removeComponentAt(int x, int y)
     Component *comp = m_grid[x][y];
     m_grid[x][y] = nullptr;
     return comp;
+}
+
+RedstoneSignal GridModel::signalFrom(int x, int y, Direction fromDir) const
+{
+    // 邻居坐标 = 从 fromDir 方向来的那个邻居
+    int nx = x + dx(fromDir);
+    int ny = y + dy(fromDir);
+
+    if (!isValid(nx, ny))
+        return {};
+
+    Component *neighbor = cellAt(nx, ny);
+    if (!neighbor)
+        return {};
+
+    // 邻居必须能向对侧（朝向本格）输出
+    Direction signalDir = opposite(fromDir);    // 信号指向方向 = 朝向我们
+    if (!neighbor->canOutputTo(signalDir))
+        return {};
+
+    return RedstoneSignal{
+        .strength  = neighbor->outputStrength(),
+        .direction = signalDir,                 // 传播方向 = 指向本格
+        .isStrong  = neighbor->isStrongOutput()
+    };
 }

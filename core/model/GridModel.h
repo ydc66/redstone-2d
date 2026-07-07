@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "core/meta_component/RedstoneSignal.h"
+
 // 前向声明
 class Component;
 
@@ -26,6 +28,9 @@ public:
     Component* cellAt(int x, int y) const;
     void placeComponent(int x, int y, Component *comp);
     Component* removeComponentAt(int x, int y);
+
+    // ─── 实时信号查询（Phase 2 BFS 传播用，每次计算） ───
+    RedstoneSignal signalFrom(int x, int y, Direction fromDir) const;
 
 private:
     int m_width  = 0;
