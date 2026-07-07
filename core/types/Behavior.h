@@ -15,4 +15,7 @@ public:
 
     // ─── 渲染 ───
     virtual void paint(QPainter *painter, int cellSize) const = 0;
+
+    // ─── 交互（子类可响应点击切换状态） ───
+    virtual void onInteract() {}
 };
