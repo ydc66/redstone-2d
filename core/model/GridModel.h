@@ -26,8 +26,8 @@ public:
 
     // ─── 格子操作 ───
     Component* cellAt(int x, int y) const;
-    void placeComponent(int x, int y, Component *comp);
-    Component* removeComponentAt(int x, int y);
+    void placeComponent(int x, int y, std::unique_ptr<Component> comp);
+    std::unique_ptr<Component> removeComponentAt(int x, int y);
 
     // ─── 实时信号查询（Phase 2 BFS 传播用，每次计算） ───
     RedstoneSignal signalFrom(int x, int y, Direction fromDir) const;
@@ -36,5 +36,6 @@ private:
     int m_width  = 0;
     int m_height = 0;
 
-    std::vector<std::vector<Component*>>  m_grid;  ///< 网格数据
+    /// 网格数据以 unique_ptr 自动管理元件生命周期
+    std::vector<std::vector<std::unique_ptr<Component>>>  m_grid;
 };

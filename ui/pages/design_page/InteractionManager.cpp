@@ -45,7 +45,7 @@ InteractionManager::InteractionManager(QGraphicsView *view,
             this, [this](int x, int y, const QString &id) {
         auto comp = ComponentRegistry::instance().create(id, x, y);
         if (comp) {
-            m_grid->placeComponent(x, y, comp.release());
+            m_grid->placeComponent(x, y, std::move(comp));
             m_scene->update();
         }
     });
@@ -55,9 +55,8 @@ InteractionManager::InteractionManager(QGraphicsView *view,
         m_interactions[static_cast<int>(InteractionMode::Destroy)]);
     connect(destroy, &DestroyInteraction::componentDestroyed,
             this, [this](const QString &/*ignored*/, int x, int y) {
-        auto *comp = m_grid->removeComponentAt(x, y);
+        auto comp = m_grid->removeComponentAt(x, y);
         if (comp) {
-            delete comp;
             m_scene->update();
         }
     });

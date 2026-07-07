@@ -4,9 +4,7 @@
 
 // ─── GridModel ───
 
-GridModel::GridModel()
-{
-}
+GridModel::GridModel() = default;
 
 GridModel::~GridModel() = default;
 
@@ -29,23 +27,21 @@ Component* GridModel::cellAt(int x, int y) const
 {
     if (!isValid(x, y))
         return nullptr;
-    return m_grid[x][y];
+    return m_grid[x][y].get();
 }
 
-void GridModel::placeComponent(int x, int y, Component *comp)
+void GridModel::placeComponent(int x, int y, std::unique_ptr<Component> comp)
 {
     if (!isValid(x, y))
         return;
-    m_grid[x][y] = comp;
+    m_grid[x][y] = std::move(comp);
 }
 
-Component* GridModel::removeComponentAt(int x, int y)
+std::unique_ptr<Component> GridModel::removeComponentAt(int x, int y)
 {
     if (!isValid(x, y))
         return nullptr;
-    Component *comp = m_grid[x][y];
-    m_grid[x][y] = nullptr;
-    return comp;
+    return std::move(m_grid[x][y]);
 }
 
 RedstoneSignal GridModel::signalFrom(int x, int y, Direction fromDir) const
