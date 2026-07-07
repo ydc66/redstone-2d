@@ -32,9 +32,6 @@ public:
     /// 获取网格模型
     GridModel* grid() const { return m_grid.get(); }
 
-    /// 查询 (x,y) 从 dir 方向传入的信号强度
-    int querySignal(int x, int y, Direction dir) const;
-
     // ─── 仿真控制 ───
     /// 启动仿真循环
     void start();

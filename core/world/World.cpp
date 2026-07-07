@@ -4,8 +4,6 @@
 
 #include "core/model/GridModel.h"
 #include "core/engine/Engine.h"
-#include "core/meta_component/Component.h"
-#include "core/meta_component/Direction.h"
 
 World::World(QObject *parent)
     : QObject(parent)
@@ -61,24 +59,4 @@ void World::setSpeed(double speed)
 void World::onTimerTick()
 {
     singleTick();
-}
-
-int World::querySignal(int x, int y, Direction dir) const
-{
-    // 计算邻居坐标
-    int nx = x + dx(dir);
-    int ny = y + dy(dir);
-
-    if (!m_grid->isValid(nx, ny))
-        return 0;
-
-    Component *neighbor = m_grid->cellAt(nx, ny);
-    if (!neighbor)
-        return 0;
-
-    // 邻居是否能向反方向输出？（反方向 = 朝向我们的方向）
-    if (!neighbor->canOutputTo(opposite(dir)))
-        return 0;
-
-    return neighbor->outputStrength();
 }
