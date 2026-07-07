@@ -3,7 +3,8 @@
 #include "components/blocks/SolidBlock.h"
 #include "components/blocks/DirectionalBlock.h"
 #include "components/sources/RedstoneBlock.h"
-#include "components/transmission/RedstoneDust.h"
+#include "components/transmission/RedstoneDustLine.h"
+#include "components/transmission/RedstoneDustCross.h"
 #include "components/mechanical/RedstoneLamp.h"
 
 #include "ComponentRegistry.h"
@@ -35,11 +36,18 @@ void registerComponents()
         QStringLiteral("信号源")              // group
     );
 
-    // ─── 传输线：红石粉 ───
-    ComponentRegistry::instance().registerType<RedstoneDust>(
-        QStringLiteral("redstone_dust"),      // id
-        QStringLiteral("红石粉"),             // name
-        QStringLiteral("传输元件")            // group
+    // ─── 传输线：一字红石粉 ───
+    ComponentRegistry::instance().registerType<RedstoneDustLine>(
+        QStringLiteral("redstone_dust_line"),    // id
+        QStringLiteral("一字红石粉"),             // name
+        QStringLiteral("传输元件")                // group
+    );
+
+    // ─── 传输线：十字红石粉 ───
+    ComponentRegistry::instance().registerType<RedstoneDustCross>(
+        QStringLiteral("redstone_dust_cross"),   // id
+        QStringLiteral("十字红石粉"),             // name
+        QStringLiteral("传输元件")                // group
     );
 
     // ─── 机械元件：红石灯 ───
