@@ -19,7 +19,7 @@ public:
     bool     isConsumer()     const override { return true; }
 
     void paintContent(QPainter *painter, int cellSize) const override;
-    void onTick() override;
+    void onTick(const std::array<RedstoneSignal, 4>& sigArray) override;
 
     bool isLit() const { return m_lit; }
 

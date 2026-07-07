@@ -17,6 +17,7 @@ public:
 
     Category category()           const override { return Category::NonSolid; }
     bool     isSignalSource()     const override { return true; }
+    bool     isStrongOutput()     const override { return true; }
     int      basePowerLevel()     const override { return 15; }
 
     void paintContent(QPainter *painter, int cellSize) const override;

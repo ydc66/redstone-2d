@@ -1,13 +1,11 @@
 #include "RedstoneLamp.h"
 
-#include "core/world/World.h"
-
 #include <QPainter>
 
 RedstoneLamp::RedstoneLamp(int x, int y)
     : Component(x, y,
                 Direction::North,
-                {},                                             // 无端口声明，onTick 自行查询世界
+                {},                                             // 无端口限制，引擎传入预计算信号
                 {})
 {
 }
@@ -36,8 +34,14 @@ void RedstoneLamp::paintContent(QPainter *painter, int cellSize) const
     painter->drawEllipse(QPointF(cx, cy), cellSize / 5, cellSize / 5);
 }
 
-void RedstoneLamp::onTick()
+void RedstoneLamp::onTick(const std::array<RedstoneSignal, 4>& sigArray)
 {
-    // 后续 engine 会在此处判断 4 方向输入，暂为骨架
-    // m_lit = world && world->querySignal(x(), y(), Direction::North) > 0; 等
+    bool powered = false;
+    for (const auto& sig : sigArray) {
+        if (sig.strength > 0) {
+            powered = true;
+            break;
+        }
+    }
+    m_lit = powered;
 }

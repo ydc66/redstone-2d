@@ -1,6 +1,6 @@
 #include "RedstoneDust.h"
 
-#include "core/world/World.h"
+#include "core/model/GridModel.h"
 #include "core/meta_component/Direction.h"
 
 #include <QPainter>
@@ -16,14 +16,18 @@ RedstoneDust::RedstoneDust(int x, int y)
 {
 }
 
-void RedstoneDust::computeOutput(World *world)
+void RedstoneDust::computeOutput(GridModel *grid)
 {
     int maxInput = 0;
+
     for (Direction dir : {Direction::North, Direction::East,
                           Direction::South, Direction::West}) {
-        int s = world->querySignal(x(), y(), dir);
-        if (s > maxInput)
-            maxInput = s;
+        RedstoneSignal sig = grid->signalFrom(x(), y(), dir);
+
+        // 只有强充能才能激活红石粉
+        if (!sig.isStrong) continue;
+        if (sig.strength > maxInput)
+            maxInput = sig.strength;
     }
     setOutputStrength(std::max(0, maxInput - 1));
 }
