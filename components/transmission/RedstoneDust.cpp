@@ -24,8 +24,16 @@ void RedstoneDust::computeOutput(GridModel *grid)
                           Direction::South, Direction::West}) {
         RedstoneSignal sig = grid->signalFrom(x(), y(), dir);
 
-        // 只有强充能才能激活红石粉
-        if (!sig.isStrong) continue;
+        // 弱充能只有来自实心方块时才不可激活红石粉
+        // 其他元件（如另一个红石粉）的弱充能可以激活红石粉（直连有效）
+        if (!sig.isStrong) {
+            int nx = x() + dx(dir), ny = y() + dy(dir);
+            if (!grid->isValid(nx, ny)) continue;
+            auto *neighbor = grid->cellAt(nx, ny);
+            if (neighbor && neighbor->isSolid())
+                continue;   // 实心方块的弱充能 → 跳过
+        }
+
         if (sig.strength > maxInput)
             maxInput = sig.strength;
     }
