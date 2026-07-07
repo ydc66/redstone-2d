@@ -5,32 +5,15 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
 
+# ─── 自动扫描所有源文件 ───
+# 递归查找所有 .cpp 和 .h，新增文件后重新运行 cmake 即可
+file(GLOB_RECURSE SOURCES *.cpp *.h)
+list(FILTER SOURCES EXCLUDE REGEX "/build/")
+list(FILTER SOURCES EXCLUDE REGEX "/\\.")
+
 qt_add_executable(redstone-2d
-    WIN32 MACOSX_BUNDLE
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-
-    ui/SideBar.cpp
-    ui/SideBar.h
-    ui/MenuBar.cpp
-    ui/MenuBar.h
-
-    ui/pages/WelcomePage.cpp
-    ui/pages/WelcomePage.h
-    ui/pages/DesignPage.cpp
-    ui/pages/DesignPage.h
-    ui/pages/HelpPage.cpp
-    ui/pages/HelpPage.h
-    ui/pages/SettingsPage.cpp
-    ui/pages/SettingsPage.h
-
-    ui/pages/design_page/ComponentPanel.cpp
-    ui/pages/design_page/ComponentPanel.h
-    ui/pages/design_page/SimControlPanel.cpp
-    ui/pages/design_page/SimControlPanel.h
-    ui/pages/design_page/EditCanvas.cpp
-    ui/pages/design_page/EditCanvas.h
+    MACOSX_BUNDLE
+    ${SOURCES}
 )
 
 target_link_libraries(redstone-2d
@@ -39,9 +22,8 @@ target_link_libraries(redstone-2d
         Qt::Widgets
 )
 
-# 等价于 WIN32：不显示控制台窗口
-target_link_options(redstone-2d PRIVATE "-Wl,--subsystem,windows")
-
+# 添加项目根目录到包含路径，保证 #include "core/..." 等写法可用
+target_include_directories(redstone-2d PRIVATE ${CMAKE_SOURCE_DIR})
 
 install(TARGETS redstone-2d
     BUNDLE  DESTINATION .
