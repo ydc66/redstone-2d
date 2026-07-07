@@ -36,8 +36,17 @@ void SelectInteraction::onLeftMove(const QPointF &scenePos)
 
     const QPoint grid = scenePosToGrid(scenePos);
     if (grid != m_dragStartGrid && m_grid && m_grid->isValid(grid.x(), grid.y())) {
-        emit componentMoved(m_selectedId, grid.x(), grid.y());
+        // 仅在目标格为空时移动元件
+        if (!m_grid->cellAt(grid.x(), grid.y())) {
+            auto *comp = m_grid->removeComponentAt(m_dragStartGrid.x(), m_dragStartGrid.y());
+            if (comp) {
+                m_grid->placeComponent(grid.x(), grid.y(), comp);
+                m_scene->update();
+            }
+        }
         m_dragStartGrid = grid;
+        updateHighlight();
+        emit componentMoved(m_selectedId, grid.x(), grid.y());
     }
 }
 
