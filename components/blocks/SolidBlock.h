@@ -4,8 +4,6 @@
 
 #include <QColor>
 
-class QPainter;
-
 /**
  * @brief 实心方块 — 纯方块渲染 + 材质切换交互
  *
@@ -18,7 +16,10 @@ public:
     explicit SolidBlock(int x, int y);
 
     Category category() const override { return Category::Solid; }
+    bool     isTransceiver() const override { return true; }
 
+    void computeOutput(GridModel *grid) override;
+    bool isStrongOutput() const override { return m_strongPowered; }
     void paintContent(QPainter *painter, int cellSize) const override;
     void onInteract() override;
 
@@ -33,4 +34,5 @@ private:
     static constexpr int   kMaterialCount = 3;
 
     int m_currentIdx = 0;
+    bool m_strongPowered = false;
 };

@@ -1,5 +1,8 @@
 #include "SolidBlock.h"
 
+#include "core/model/GridModel.h"
+#include "core/meta_component/Direction.h"
+
 #include <QPainter>
 
 // ═══════════════════════════════════════════════════════════
@@ -17,9 +20,30 @@ const SolidBlock::Material SolidBlock::kMaterials[] = {
 // ═══════════════════════════════════════════════════════════
 
 SolidBlock::SolidBlock(int x, int y)
-    : Component(x, y)
+    : Component(x, y,
+                Direction::North,
+                {RelDir::Front, RelDir::Right,                   // 四方向输入（被充能）
+                 RelDir::Back,  RelDir::Left},
+                {RelDir::Front, RelDir::Right,                   // 四方向输出（传导弱充能）
+                 RelDir::Back,  RelDir::Left})
     , m_currentIdx(0)
 {
+}
+
+void SolidBlock::computeOutput(GridModel *grid)
+{
+    int maxInput = 0;
+    m_strongPowered = false;
+    for (Direction dir : {Direction::North, Direction::East,
+                          Direction::South, Direction::West}) {
+        RedstoneSignal sig = grid->signalFrom(x(), y(), dir);
+        if (sig.strength > maxInput)
+            maxInput = sig.strength;
+        if (sig.isStrong)
+            m_strongPowered = true;
+    }
+    // 实心方块不衰减传导（弱充能）
+    setOutputStrength(maxInput);
 }
 
 void SolidBlock::paintContent(QPainter *painter, int cellSize) const
