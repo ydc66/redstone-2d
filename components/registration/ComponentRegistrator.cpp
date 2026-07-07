@@ -1,6 +1,7 @@
 #include "ComponentRegistrator.h"
 
 #include "components/blocks/SolidBlock.h"
+#include "components/blocks/DirectionalBlock.h"
 
 #include "ComponentRegistry.h"
 
@@ -14,6 +15,13 @@ void registerComponents()
     ComponentRegistry::instance().registerType<SolidBlock>(
         QStringLiteral("solid_block"),       // id
         QStringLiteral("实心方块"),           // name
+        QStringLiteral("纯方块")              // group
+    );
+
+    // ─── 定向方块：方向箭头 ───
+    ComponentRegistry::instance().registerType<DirectionalBlock>(
+        QStringLiteral("directional_block"), // id
+        QStringLiteral("方向箭头"),           // name
         QStringLiteral("纯方块")              // group
     );
 }
