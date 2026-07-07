@@ -1,8 +1,8 @@
 #include "ComponentRegistrator.h"
 
-#include "blocks/SolidBlock.h"
+#include "components/blocks/SolidBlock.h"
 
-#include "core/ComponentRegistry.h"
+#include "ComponentRegistry.h"
 
 void registerComponents()
 {

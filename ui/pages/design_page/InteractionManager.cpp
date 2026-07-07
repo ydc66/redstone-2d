@@ -10,7 +10,7 @@
 #include "interaction_mode/InteractInteraction.h"
 #include "interaction_mode/DestroyInteraction.h"
 
-#include "core/ComponentRegistry.h"
+#include "components/registration/ComponentRegistry.h"
 #include "core/model/GridModel.h"
 #include "core/meta_component/Component.h"
 #include "ui/pages/design_page/GridGraphicsScene.h"

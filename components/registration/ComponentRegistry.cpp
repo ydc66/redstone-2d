@@ -1,5 +1,5 @@
 #include "ComponentRegistry.h"
-#include "meta_component/Component.h"
+#include "core/meta_component/Component.h"
 
 // ═══════════════════════════════════════════════════════════
 //  单例：静态局部变量，C++11 起线程安全

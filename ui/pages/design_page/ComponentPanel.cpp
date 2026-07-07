@@ -6,7 +6,7 @@
 
 #include "ComponentPanel.h"
 
-#include "core/ComponentRegistry.h"
+#include "components/registration/ComponentRegistry.h"
 
 #include <QLabel>
 #include <QTreeWidget>
