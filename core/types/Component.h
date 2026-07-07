@@ -5,6 +5,7 @@
 #include "ComponentSpec.h"
 
 #include <QList>
+#include <QString>
 #include <memory>
 
 class QPainter;
@@ -41,13 +42,21 @@ public:
     // ─── 渲染（委托 Behavior） ───
     void paint(QPainter *painter, int cellSize) const;
 
+    // ─── 交互（委托 Behavior） ───
+    void onInteract() { if (m_behavior) m_behavior->onInteract(); }
+
     // ─── 脏标志 ───
     bool isDirty()    const { return m_dirty; }
     void clearDirty()       { m_dirty = false; }
     void markDirty()        { m_dirty = true; }
 
+    // ─── 注册 ID（关联 ComponentRegistry 中的 entry） ───
+    const QString& registryId() const { return m_registryId; }
+    void setRegistryId(const QString &id) { m_registryId = id; }
+
 private:
     int             m_x, m_y;
+    QString         m_registryId;
     Direction       m_facing    = Direction::North;
     ComponentSpec   m_spec;
     bool            m_dirty     = false;
