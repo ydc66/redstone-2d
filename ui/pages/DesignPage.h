@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <memory>
 
-#include "core/model/GridModel.h"
+#include "core/world/World.h"
 
 class QTabBar;
 class QSplitter;
@@ -36,7 +36,7 @@ private:
     void setupUI();
     void initGridModel();
 
-    std::unique_ptr<GridModel> m_gridModel;
+    std::unique_ptr<World> m_world;
 
     QTabBar         *m_tabBar;
     QSplitter       *m_splitter;

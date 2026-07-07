@@ -11,8 +11,9 @@
 #include "design_page/ModeButtonGroup.h"
 #include "design_page/InteractionManager.h"
 #include "design_page/interaction_mode/PlaceInteraction.h"
-
 #include "core/model/GridModel.h"
+
+
 
 /**
  * @brief   构建设计页面
@@ -28,9 +29,9 @@ DesignPage::DesignPage(QWidget *parent)
     , m_modeGroup(nullptr)
     , m_interactionMgr(nullptr)
 {
-    // 先创建网格模型（画布初始化时需要）
-    m_gridModel = std::make_unique<GridModel>();
-    m_gridModel->resize(16, 16);
+    // 先创建世界（内部包含网格模型，画布初始化时需要）
+    m_world = std::make_unique<World>();
+    m_world->grid()->resize(16, 16);
 
     setupUI();
     initGridModel();
@@ -80,7 +81,7 @@ void DesignPage::setupUI()
     m_splitter->addWidget(leftPanel);
 
     // ─── 右侧画布 ───
-    m_editCanvas = new EditCanvas(m_gridModel.get(), this);
+    m_editCanvas = new EditCanvas(m_world->grid(), this);
     m_splitter->addWidget(m_editCanvas);
 
     // QSplitter 默认比例：左侧 ~250px，右侧占满剩余
@@ -94,7 +95,7 @@ void DesignPage::initGridModel()
     // ─── 初始化交互管理器 ───
     if (auto *gridScene = m_editCanvas->scene()) {
         m_interactionMgr = new InteractionManager(
-            m_editCanvas->view(), m_gridModel.get(), gridScene, this);
+            m_editCanvas->view(), m_world->grid(), gridScene, this);
         m_interactionMgr->install();
 
         // ─── 元件面板选择 → 放置模式激活元件 ───
