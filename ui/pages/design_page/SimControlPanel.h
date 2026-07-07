@@ -33,6 +33,10 @@ signals:
     /// 速度倍率变化信号
     void speedChanged(double speed);
 
+public slots:
+    /// 更新 tick 计数显示
+    void onTickCountChanged(int tickCount);
+
 private slots:
     /// 速度按钮点击槽函数
     void onSpeedButtonClicked(int id);
@@ -62,6 +66,7 @@ private:
     QButtonGroup *m_speedGroup;
     QSlider      *m_speedSlider;
     QLabel       *m_speedLabel;
+    QLabel       *m_tickLabel;
     double        m_currentSpeed = 1.0;
 };
 

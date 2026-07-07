@@ -106,4 +106,22 @@ void DesignPage::initGridModel()
         connect(m_modeGroup, &ModeButtonGroup::modeChanged,
                 m_interactionMgr, &InteractionManager::setMode);
     }
+
+    // ─── 仿真控制信号联动 ───
+    connect(m_simControlPanel, &SimControlPanel::runToggled,
+            this, [this](bool running) {
+        if (running)
+            m_world->start();
+        else
+            m_world->stop();
+    });
+
+    connect(m_simControlPanel, &SimControlPanel::stepRequested,
+            m_world.get(), &World::singleTick);
+
+    connect(m_simControlPanel, &SimControlPanel::speedChanged,
+            m_world.get(), &World::setSpeed);
+
+    connect(m_world.get(), &World::tickCompleted,
+            m_simControlPanel, &SimControlPanel::onTickCountChanged);
 }

@@ -105,6 +105,7 @@ void SimControlPanel::setupUI()
     btnRow->setSpacing(6);
 
     m_btnRun = new QPushButton(QStringLiteral("▶ 运行"), this);
+    m_btnRun->setCheckable(true);
     m_btnStep = new QPushButton(QStringLiteral("⏭ 步进"), this);
     btnRow->addWidget(m_btnRun);
     btnRow->addWidget(m_btnStep);
@@ -161,12 +162,28 @@ void SimControlPanel::setupUI()
 
     layout->addLayout(sliderRow);
 
+    // ─── Tick 计数 ───
+    m_tickLabel = new QLabel(QStringLiteral("Tick: 0"), this);
+    m_tickLabel->setStyleSheet(QStringLiteral("font-size: 12px; color: #888;"));
+    layout->addWidget(m_tickLabel);
+
     // 默认选中 1×
     m_btnPreset[1]->setChecked(true);
 }
 
 void SimControlPanel::setupConnections()
 {
+    // 运行/暂停按钮
+    connect(m_btnRun, &QPushButton::toggled,
+            this, [this](bool checked) {
+        m_btnRun->setText(checked ? QStringLiteral("■ 停止") : QStringLiteral("▶ 运行"));
+        emit runToggled(checked);
+    });
+
+    // 步进按钮
+    connect(m_btnStep, &QPushButton::clicked,
+            this, &SimControlPanel::stepRequested);
+
     // 速度按钮点击 → 同步滑块
     connect(m_speedGroup, &QButtonGroup::idClicked,
             this, &SimControlPanel::onSpeedButtonClicked);
@@ -229,4 +246,9 @@ void SimControlPanel::setSpeedBySlider(int sliderValue)
         m_btnCustom->setChecked(true);
     }
     m_speedGroup->blockSignals(false);
+}
+
+void SimControlPanel::onTickCountChanged(int tickCount)
+{
+    m_tickLabel->setText(QStringLiteral("Tick: %1").arg(tickCount));
 }

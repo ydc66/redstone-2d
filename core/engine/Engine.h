@@ -1,10 +1,10 @@
 #pragma once
 
 /**
- * @brief 仿真引擎骨架
+ * @brief 仿真引擎
  *
  * 管理红石电路的 tick 模拟。
- * 当前为骨架占位，后续实现 tick 三阶段（collectInputs → onTick → commitState）。
+ * 当前为骨架占位，后续实现 Phase 1~3 信号传播。
  */
 class Engine
 {
@@ -16,11 +16,8 @@ public:
     Engine& operator=(const Engine&) = delete;
 
     /// 执行一个 tick
-    void processTick();
-
-    /// 引擎是否正在运行
-    bool isRunning() const { return m_running; }
+    void processTick(class World *world);
 
 private:
-    bool m_running = false;
+    // 运行状态由 World 统一管理
 };
