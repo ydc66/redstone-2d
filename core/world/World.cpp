@@ -1,7 +1,7 @@
 #include "World.h"
 
 #include "core/model/GridModel.h"
-#include "engine/Engine.h"
+#include "core/engine/Engine.h"
 
 World::World()
     : m_grid(std::make_unique<GridModel>())
