@@ -1,6 +1,6 @@
 #include "ComponentRegistrator.h"
 
-#include "blocks/SolidBlockBehavior.h"
+#include "blocks/SolidBlock.h"
 
 #include "core/ComponentRegistry.h"
 #include "core/meta_component/ComponentSpec.h"

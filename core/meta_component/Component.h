@@ -1,22 +1,26 @@
 #pragma once
 
-#include "behaviors/Behavior.h"
 #include "Direction.h"
 #include "ComponentSpec.h"
 
 #include <QList>
 #include <QString>
-#include <memory>
 
 class QPainter;
 
+/**
+ * @brief 元件抽象基类
+ *
+ * 集数据与策略于一体，是所有方块/元件的公共基类。
+ * 子类必须实现 paint()，可按需重写 onInteract() 和 onTick()。
+ */
 class Component
 {
 public:
-    Component(int x, int y, Direction facing, ComponentSpec spec,
+    Component(int x, int y, Direction facing,
+              Category category, bool isPushable, int basePowerLevel,
               QList<RelDir> inputPorts,
-              QList<RelDir> outputPorts,
-              std::unique_ptr<Behavior> behavior);
+              QList<RelDir> outputPorts);
 
     virtual ~Component() = default;
 
@@ -29,8 +33,10 @@ public:
     void setFacing(Direction d)    { m_facing = d; }
 
     // ─── 物理属性 ───
-    const ComponentSpec& spec() const { return m_spec; }
-    bool isSolid() const { return m_spec.category == Category::Solid; }
+    Category category()       const { return m_category; }
+    bool isSolid()            const { return m_category == Category::Solid; }
+    bool isPushable()         const { return m_isPushable; }
+    int  basePowerLevel()     const { return m_basePowerLevel; }
 
     // ─── 端口查询 ───
     const QList<RelDir>& inputPorts()  const { return m_inputPorts; }
@@ -39,13 +45,12 @@ public:
     bool canInputFrom(Direction absDir)  const;
     bool canOutputTo(Direction absDir)   const;
 
-    // ─── 渲染（委托 Behavior） ───
-    void paint(QPainter *painter, int cellSize) const;
+    // ─── 虚方法：子类按需重写 ───
+    virtual void paint(QPainter *painter, int cellSize) const = 0;
+    virtual void onInteract() {}
+    virtual void onTick() {}
 
-    // ─── 交互（委托 Behavior） ───
-    void onInteract() { if (m_behavior) m_behavior->onInteract(); }
-
-    // ─── 脏标志 ───
+    // ─── 脏标志（引擎调度用） ───
     bool isDirty()    const { return m_dirty; }
     void clearDirty()       { m_dirty = false; }
     void markDirty()        { m_dirty = true; }
@@ -57,12 +62,12 @@ public:
 private:
     int             m_x, m_y;
     QString         m_registryId;
-    Direction       m_facing    = Direction::North;
-    ComponentSpec   m_spec;
-    bool            m_dirty     = false;
+    Direction       m_facing        = Direction::North;
+    Category        m_category      = Category::Air;
+    bool            m_isPushable    = false;
+    int             m_basePowerLevel = 0;
+    bool            m_dirty         = false;
 
     QList<RelDir>   m_inputPorts;
     QList<RelDir>   m_outputPorts;
-
-    std::unique_ptr<Behavior> m_behavior;
 };

@@ -1,4 +1,4 @@
-#include "SolidBlockBehavior.h"
+#include "SolidBlock.h"
 
 #include <QPainter>
 
@@ -6,22 +6,25 @@
 //  材质预设表
 // ═══════════════════════════════════════════════════════════
 
-const SolidBlockBehavior::Material SolidBlockBehavior::kMaterials[] = {
+const SolidBlock::Material SolidBlock::kMaterials[] = {
     { QColor("#8B8B8B"), QColor("#6B6B6B"), QColor("#7A7A7A") },   // 灰石砖
     { QColor("#A0A0A0"), QColor("#808080"), QColor("#909090") },   // 石砖
     { QColor("#C0A070"), QColor("#A08050"), QColor("#B09060") },   // 土砖
 };
 
 // ═══════════════════════════════════════════════════════════
-//  SolidBlockBehavior — 实心方块
+//  SolidBlock — 实心方块
 // ═══════════════════════════════════════════════════════════
 
-SolidBlockBehavior::SolidBlockBehavior()
-    : m_currentIdx(0)
+SolidBlock::SolidBlock(int x, int y)
+    : Component(x, y, Direction::North,
+                Category::Solid, false, 0,
+                QList<RelDir>{}, QList<RelDir>{})
+    , m_currentIdx(0)
 {
 }
 
-void SolidBlockBehavior::paint(QPainter *painter, int cellSize) const
+void SolidBlock::paint(QPainter *painter, int cellSize) const
 {
     const auto &mat = kMaterials[m_currentIdx];
 
@@ -41,7 +44,7 @@ void SolidBlockBehavior::paint(QPainter *painter, int cellSize) const
     }
 }
 
-void SolidBlockBehavior::onInteract()
+void SolidBlock::onInteract()
 {
     m_currentIdx = (m_currentIdx + 1) % kMaterialCount;
 }
@@ -52,16 +55,5 @@ void SolidBlockBehavior::onInteract()
 
 std::unique_ptr<Component> createSolidBlock(int x, int y)
 {
-    ComponentSpec spec;
-    spec.category       = Category::Solid;
-    spec.isPushable     = false;
-    spec.basePowerLevel = 0;
-
-    return std::make_unique<Component>(
-        x, y,
-        Direction::North,
-        spec,
-        QList<RelDir>{},
-        QList<RelDir>{},
-        std::make_unique<SolidBlockBehavior>());
+    return std::make_unique<SolidBlock>(x, y);
 }
