@@ -36,11 +36,12 @@ void SolidBlock::computeOutput(GridModel *grid)
     int maxInput = 0;
     m_strongPowered = false;
     for (Direction dir : allDirections()) {
-        // ─── 过滤红石火把信号（防自激） ───
+        // ─── 过滤红石火把和其他实心方块（防自激/防循环充能） ───
         int nx = x() + dx(dir), ny = y() + dy(dir);
         if (grid->isValid(nx, ny)) {
             auto *neighbor = grid->cellAt(nx, ny);
-            if (neighbor && dynamic_cast<RedstoneTorchBase *>(neighbor))
+            if (neighbor && (neighbor->isSolid()
+                          || dynamic_cast<RedstoneTorchBase *>(neighbor)))
                 continue;
         }
 
