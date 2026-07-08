@@ -2,6 +2,7 @@
 
 #include <QTimer>
 
+#include "core/meta_component/Component.h"
 #include "core/model/GridModel.h"
 #include "core/engine/Engine.h"
 
@@ -37,10 +38,21 @@ void World::stop()
 
 void World::singleTick()
 {
-    if (!m_engine)
+    if (!m_engine || !m_grid)
         return;
 
     m_engine->processTick(this);
+
+    // ─── 清理标记为待销毁的元件 ───
+    for (int x = 0; x < m_grid->width(); ++x) {
+        for (int y = 0; y < m_grid->height(); ++y) {
+            auto *comp = m_grid->cellAt(x, y);
+            if (comp && comp->isMarkedForRemoval()) {
+                m_grid->removeComponentAt(x, y);
+            }
+        }
+    }
+
     m_tick++;
     emit tickCompleted(m_tick);
 }

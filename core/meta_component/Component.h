@@ -67,6 +67,9 @@ public:
     virtual bool isTransceiver()   const { return false; }
     virtual bool isConsumer()      const { return false; }
 
+    /// 是否标记为待销毁（tick 结束后由 World 统一清理）
+    virtual bool isMarkedForRemoval() const { return false; }
+
     /// 输出是否为强充能（弱充能不可激活传输元件）
     virtual bool isStrongOutput()  const { return false; }
 

@@ -1,5 +1,6 @@
 #include "SolidBlock.h"
 
+#include "components/transmission/RedstoneTorchBase.h"
 #include "core/model/GridModel.h"
 #include "core/meta_component/Direction.h"
 
@@ -34,8 +35,15 @@ void SolidBlock::computeOutput(GridModel *grid)
 {
     int maxInput = 0;
     m_strongPowered = false;
-    for (Direction dir : {Direction::North, Direction::East,
-                          Direction::South, Direction::West}) {
+    for (Direction dir : allDirections()) {
+        // ─── 过滤红石火把信号（防自激） ───
+        int nx = x() + dx(dir), ny = y() + dy(dir);
+        if (grid->isValid(nx, ny)) {
+            auto *neighbor = grid->cellAt(nx, ny);
+            if (neighbor && dynamic_cast<RedstoneTorchBase *>(neighbor))
+                continue;
+        }
+
         RedstoneSignal sig = grid->signalFrom(x(), y(), dir);
         if (sig.strength > maxInput)
             maxInput = sig.strength;

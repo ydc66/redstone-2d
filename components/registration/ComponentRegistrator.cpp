@@ -5,6 +5,8 @@
 #include "components/sources/RedstoneBlock.h"
 #include "components/transmission/RedstoneDustLine.h"
 #include "components/transmission/RedstoneDustCross.h"
+#include "components/transmission/RedstoneTorchGround.h"
+#include "components/transmission/RedstoneTorchWall.h"
 #include "components/mechanical/RedstoneLamp.h"
 
 #include "ComponentRegistry.h"
@@ -47,6 +49,20 @@ void registerComponents()
     ComponentRegistry::instance().registerType<RedstoneDustCross>(
         QStringLiteral("redstone_dust_cross"),   // id
         QStringLiteral("十字红石粉"),             // name
+        QStringLiteral("传输元件")                // group
+    );
+
+    // ─── 红石火把：地基火把 ───
+    ComponentRegistry::instance().registerType<RedstoneTorchGround>(
+        QStringLiteral("torch_ground"),           // id
+        QStringLiteral("地基红石火把"),           // name
+        QStringLiteral("传输元件")                // group
+    );
+
+    // ─── 红石火把：附着火把 ───
+    ComponentRegistry::instance().registerType<RedstoneTorchWall>(
+        QStringLiteral("torch_wall"),             // id
+        QStringLiteral("附着红石火把"),           // name
         QStringLiteral("传输元件")                // group
     );
 
