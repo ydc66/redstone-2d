@@ -3,6 +3,7 @@
 #include "components/blocks/SolidBlock.h"
 #include "components/blocks/DirectionalBlock.h"
 #include "components/sources/RedstoneBlock.h"
+#include "components/sources/Lever.h"
 #include "components/transmission/RedstoneDustLine.h"
 #include "components/transmission/RedstoneDustCross.h"
 #include "components/transmission/RedstoneTorchGround.h"
@@ -36,6 +37,13 @@ void registerComponents()
         QStringLiteral("redstone_block"),     // id
         QStringLiteral("红石块"),             // name
         QStringLiteral("信号源")              // group
+    );
+
+    // ─── 信号源：拉杆 ───
+    ComponentRegistry::instance().registerType<Lever>(
+        QStringLiteral("lever"),               // id
+        QStringLiteral("拉杆"),                // name
+        QStringLiteral("信号源")               // group
     );
 
     // ─── 传输线：一字红石粉 ───
