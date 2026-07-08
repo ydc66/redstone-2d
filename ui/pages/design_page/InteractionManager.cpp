@@ -129,7 +129,8 @@ bool InteractionManager::eventFilter(QObject *obj, QEvent *event)
         return true;
     }
 
-    // 交互模式鼠标左键按下事件
+    // 交互模式鼠标按键按下/双击事件（双击用于处理快速连续右键）
+    case QEvent::MouseButtonDblClick:
     case QEvent::MouseButtonPress: {
         auto *me = static_cast<QMouseEvent *>(event);
         if (activeInteraction()) {
@@ -189,6 +190,10 @@ bool InteractionManager::eventFilter(QObject *obj, QEvent *event)
             activeInteraction()->onKeyPress(ke);
         return false;
     }
+
+    /// 阻止右键上下文菜单弹出（避免干扰放置/选择的右键旋转）
+    case QEvent::ContextMenu:
+        return true;
 
     default:
         return QObject::eventFilter(obj, event);
