@@ -5,8 +5,9 @@
 RedstoneLamp::RedstoneLamp(int x, int y)
     : Component(x, y,
                 Direction::North,
-                {},                                             // 无端口限制，引擎传入预计算信号
-                {})
+                {RelDir::Front, RelDir::Right,              // 四方向输入
+                 RelDir::Back,  RelDir::Left},
+                {})                                          // 无输出
 {
 }
 
@@ -37,8 +38,10 @@ void RedstoneLamp::paintContent(QPainter *painter, int cellSize) const
 void RedstoneLamp::onTick(const std::array<RedstoneSignal, 4>& sigArray)
 {
     bool powered = false;
-    for (const auto& sig : sigArray) {
-        if (sig.strength > 0) {
+    for (Direction dir : allDirections()) {
+        if (!canInputFrom(dir))
+            continue;
+        if (sigArray[static_cast<int>(dir)].strength > 0) {
             powered = true;
             break;
         }

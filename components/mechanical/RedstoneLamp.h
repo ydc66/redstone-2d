@@ -7,8 +7,8 @@ class QPainter;
 /**
  * @brief 红石灯 — 消费者，被充能时亮起
  *
- * 无输入端口（接受方向无限制），无输出端口。
- * Phase 3 onTick 检查 4 方向有无信号输入，决定是否亮起。
+ * 四方向均可接收信号，通过 port 系统 + canInputFrom() 过滤。
+ * 无输出端口。
  */
 class RedstoneLamp : public Component
 {
