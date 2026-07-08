@@ -42,9 +42,10 @@ InteractionManager::InteractionManager(QGraphicsView *view,
     auto *place = static_cast<PlaceInteraction *>(
         m_interactions[static_cast<int>(InteractionMode::Place)]);
     connect(place, &PlaceInteraction::placeRequested,
-            this, [this](int x, int y, const QString &id) {
+            this, [this, place](int x, int y, const QString &id) {
         auto comp = ComponentRegistry::instance().create(id, x, y);
         if (comp) {
+            comp->setFacing(place->currentFacing());
             m_grid->placeComponent(x, y, std::move(comp));
             m_scene->update();
         }
@@ -131,31 +132,52 @@ bool InteractionManager::eventFilter(QObject *obj, QEvent *event)
     // 交互模式鼠标左键按下事件
     case QEvent::MouseButtonPress: {
         auto *me = static_cast<QMouseEvent *>(event);
-        if (me->button() == Qt::LeftButton && activeInteraction()) {
+        if (activeInteraction()) {
             const QPointF scenePos = m_view->mapToScene(me->pos());
-            activeInteraction()->onLeftPress(scenePos);
-            return true;
+            if (me->button() == Qt::LeftButton) {
+                activeInteraction()->onLeftPress(scenePos);
+                return true;
+            } else if (me->button() == Qt::RightButton) {
+                activeInteraction()->onRightPress(scenePos);
+                return true;
+            }
         }
         return false;
     }
 
-    /// 交互模式鼠标移动事件
+    /// 交互模式鼠标移动事件（悬停/拖拽）
     case QEvent::MouseMove: {
         if (activeInteraction()) {
             auto *me = static_cast<QMouseEvent *>(event);
             const QPointF scenePos = m_view->mapToScene(me->pos());
-            activeInteraction()->onLeftMove(scenePos);
+            if (me->buttons() == Qt::NoButton) {
+                // 无按键 → 悬停
+                activeInteraction()->onMouseMove(scenePos);
+            } else {
+                // 拖拽 — 按当前按下的按键分发
+                if (me->buttons() & Qt::LeftButton)
+                    activeInteraction()->onLeftMove(scenePos);
+                if (me->buttons() & Qt::RightButton)
+                    activeInteraction()->onRightMove(scenePos);
+                // 部分子类在拖拽时仍需悬停更新（如虚影预览）
+                activeInteraction()->onMouseMove(scenePos);
+            }
         }
         return false;
     }
 
-    /// 交互模式鼠标左键释放事件
+    /// 交互模式鼠标按键释放事件
     case QEvent::MouseButtonRelease: {
         auto *me = static_cast<QMouseEvent *>(event);
-        if (me->button() == Qt::LeftButton && activeInteraction()) {
+        if (activeInteraction()) {
             const QPointF scenePos = m_view->mapToScene(me->pos());
-            activeInteraction()->onLeftRelease(scenePos);
-            return true;
+            if (me->button() == Qt::LeftButton) {
+                activeInteraction()->onLeftRelease(scenePos);
+                return true;
+            } else if (me->button() == Qt::RightButton) {
+                activeInteraction()->onRightRelease(scenePos);
+                return true;
+            }
         }
         return false;
     }
