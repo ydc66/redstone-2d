@@ -39,22 +39,30 @@ void RedstoneTorchWall::paintContent(QPainter *painter, int cellSize) const
 {
     const int cx = cellSize / 2;
 
-    // ─── 木棍（棕色长方形，位于下方） ───
-    const int stickW = cellSize / 6;
+    // ─── 木棍（PERU 色，从中心延伸向附着面一侧） ───
+    // 朝北版本：附着面 Back=North 在上方，木棍画在下半，
+    // 基类按 facing 旋转后木棍即贴墙。
+    const int stickW = cellSize / 8;                  // 2/16
     const int stickX = cx - stickW / 2;
-    const int stickY = cellSize / 2;                  // 从中间到下方
-    const int stickH = cellSize - stickY - 1;         // 留 1px 边距
+    const int stickY = cellSize / 2;                  // 从中心到下边缘
+    const int stickH = cellSize / 2 - 1;              // 留 1px 边距
 
     painter->setPen(Qt::NoPen);
-    painter->setBrush(QColor(139, 90, 43));
+    painter->setBrush(QColor(205, 133, 63));          // PERU 木质色
     painter->drawRect(stickX, stickY, stickW, stickH);
 
-    // ─── 火焰（小正方形，位于上方） ───
-    const int sqSize = cellSize / 3;
-    const int sqX = (cellSize - sqSize) / 2;
-    const int sqY = cellSize / 6;                     // 靠上位置
-
-    painter->setBrush(isLit() ? QColor(220, 50, 50)     // 点亮：红色
-                              : QColor(100, 20, 20));   // 熄灭：暗红色
-    painter->drawRect(sqX, sqY, sqSize, sqSize);
+    // ─── 火焰同心圆（居中，EGE 亮心画法） ───
+    const int outerR = cellSize / 4;
+    const int innerR = cellSize / 8;
+    if (isLit()) {
+        painter->setBrush(QColor(255, 0, 0));
+        painter->drawEllipse(QPointF(cx, cellSize / 2), outerR, outerR);
+        painter->setBrush(QColor(255, 255, 0));
+        painter->drawEllipse(QPointF(cx, cellSize / 2), innerR, innerR);
+    } else {
+        painter->setBrush(QColor(135, 0, 0));
+        painter->drawEllipse(QPointF(cx, cellSize / 2), outerR, outerR);
+        painter->setBrush(QColor(49, 26, 17));
+        painter->drawEllipse(QPointF(cx, cellSize / 2), innerR, innerR);
+    }
 }

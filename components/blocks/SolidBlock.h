@@ -27,7 +27,6 @@ private:
     struct Material {
         QColor fill;
         QColor border;
-        QColor texture;
     };
 
     static const Material kMaterials[];

@@ -12,8 +12,8 @@ RedstoneDustLine::RedstoneDustLine(int x, int y)
 void RedstoneDustLine::paintContent(QPainter *painter, int cellSize) const
 {
     const int p = outputStrength();       // 0..15
-    const int r = 40 + p * 12;           // 40..220
-    QColor color(r, 10, 10, 200);
+    const int r = 135 + p * 8;           // 135..255（EGE 16 级色阶 0x87..0xff）
+    QColor color(r, 0, 0);
 
     const int cx = cellSize / 2;
     const int cy = cellSize / 2;

@@ -13,12 +13,23 @@ RedstoneTorchGround::RedstoneTorchGround(int x, int y)
 
 void RedstoneTorchGround::paintContent(QPainter *painter, int cellSize) const
 {
-    const int size = cellSize / 3;                  // 小正方形
-    const int x = (cellSize - size) / 2;
-    const int y = (cellSize - size) / 2;
+    const int cx = cellSize / 2;
+    const int cy = cellSize / 2;
+    const int outerR = cellSize / 4;    // 外圈半径（4/16）
+    const int innerR = cellSize / 8;    // 内圈半径（2/16）
 
     painter->setPen(Qt::NoPen);
-    painter->setBrush(isLit() ? QColor(220, 50, 50)     // 点亮：红色
-                              : QColor(100, 20, 20));   // 熄灭：暗红色
-    painter->drawRect(x, y, size, size);
+    if (isLit()) {
+        // 点亮：暗红外圈 + 亮黄内芯（EGE 亮心画法）
+        painter->setBrush(QColor(255, 0, 0));
+        painter->drawEllipse(QPointF(cx, cy), outerR, outerR);
+        painter->setBrush(QColor(255, 255, 0));
+        painter->drawEllipse(QPointF(cx, cy), innerR, innerR);
+    } else {
+        // 熄灭：暗红外圈 + 深棕内芯
+        painter->setBrush(QColor(135, 0, 0));
+        painter->drawEllipse(QPointF(cx, cy), outerR, outerR);
+        painter->setBrush(QColor(49, 26, 17));
+        painter->drawEllipse(QPointF(cx, cy), innerR, innerR);
+    }
 }

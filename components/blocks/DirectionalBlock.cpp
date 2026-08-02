@@ -20,15 +20,15 @@ void DirectionalBlock::paintContent(QPainter *painter, int cellSize) const
     const int cx = cs / 2;                // 中心 x
     const int tipY = margin;              // 箭头顶端 y
 
-    // ─── 圆角背景 ───
+    // ─── 背景（直角矩形，EGE 简洁风） ───
     painter->setPen(Qt::NoPen);
     painter->setBrush(QColor("#E8D8B0"));             // 米黄底
-    painter->drawRoundedRect(margin, margin, body, body, cs / 6, cs / 6);
+    painter->drawRect(margin, margin, body, body);
 
     // ─── 边框 ───
     painter->setPen(QPen(QColor("#8B7D5B"), 2));
     painter->setBrush(Qt::NoBrush);
-    painter->drawRoundedRect(margin, margin, body, body, cs / 6, cs / 6);
+    painter->drawRect(margin, margin, body, body);
 
     // ─── 箭头（朝北，基类 paint 会根据朝向旋转） ───
     const int shaftW = qMax(cs / 8, 3);                // 箭杆宽
