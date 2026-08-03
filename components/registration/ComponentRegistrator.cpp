@@ -84,5 +84,6 @@ void registerComponents()
 
 // ═══════════════════════════════════════════════════════════
 //  程序启动时自动注册一次（静态初始化）
+//  导出为链接标志：拆为静态库后，main 需引用该符号防止对象文件被裁剪
 // ═══════════════════════════════════════════════════════════
-static bool s_registered = (registerComponents(), true);
+const bool g_componentRegistrationFlag = (registerComponents(), true);
