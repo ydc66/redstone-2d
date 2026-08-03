@@ -1,29 +1,29 @@
 cmake_minimum_required(VERSION 3.19)
 project(redstone-2d LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Test)
 
 qt_standard_project_setup()
 
-# ─── 自动扫描所有源文件 ───
-# 递归查找所有 .cpp 和 .h，新增文件后重新运行 cmake 即可
-file(GLOB_RECURSE SOURCES *.cpp *.h)
-list(FILTER SOURCES EXCLUDE REGEX "/build/")
-list(FILTER SOURCES EXCLUDE REGEX "/\\.")
+# ─── 分层库：core → components → ui（依赖单向；测试只依赖前两层）───
+add_subdirectory(core)
+add_subdirectory(components)
+add_subdirectory(ui)
 
+# ─── 主程序（应用壳：入口 + 主窗口装配）───
 qt_add_executable(redstone-2d
     MACOSX_BUNDLE
-    ${SOURCES}
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
 )
 
+# redstone-2d-ui 的 PUBLIC 依赖会连带传播 components / core 的 include 与链接
 target_link_libraries(redstone-2d
     PRIVATE
-        Qt::Core
+        redstone-2d-ui
         Qt::Widgets
 )
-
-# 添加项目根目录到包含路径，保证 #include "core/..." 等写法可用
-target_include_directories(redstone-2d PRIVATE ${CMAKE_SOURCE_DIR})
 
 install(TARGETS redstone-2d
     BUNDLE  DESTINATION .
@@ -37,3 +37,7 @@ qt_generate_deploy_app_script(
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${deploy_script})
+
+# ─── 单元测试（ctest 一键运行；enable_testing 需在 add_subdirectory(tests) 之前）───
+enable_testing()
+add_subdirectory(tests)

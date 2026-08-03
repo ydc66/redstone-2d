@@ -1,0 +1,41 @@
+# ─── UI 库：主窗口各页面与交互系统（仅主程序使用；测试不依赖本层）───
+add_library(redstone-2d-ui STATIC
+    MenuBar.cpp
+    MenuBar.h
+    SideBar.cpp
+    SideBar.h
+    pages/DesignPage.cpp
+    pages/DesignPage.h
+    pages/HelpPage.cpp
+    pages/HelpPage.h
+    pages/SettingsPage.cpp
+    pages/SettingsPage.h
+    pages/WelcomePage.cpp
+    pages/WelcomePage.h
+    pages/design_page/ComponentPanel.cpp
+    pages/design_page/ComponentPanel.h
+    pages/design_page/EditCanvas.cpp
+    pages/design_page/EditCanvas.h
+    pages/design_page/GridGraphicsScene.cpp
+    pages/design_page/GridGraphicsScene.h
+    pages/design_page/InteractionManager.cpp
+    pages/design_page/InteractionManager.h
+    pages/design_page/ModeButtonGroup.cpp
+    pages/design_page/ModeButtonGroup.h
+    pages/design_page/SimControlPanel.cpp
+    pages/design_page/SimControlPanel.h
+    pages/design_page/interaction_mode/DestroyInteraction.cpp
+    pages/design_page/interaction_mode/DestroyInteraction.h
+    pages/design_page/interaction_mode/InteractInteraction.cpp
+    pages/design_page/interaction_mode/InteractInteraction.h
+    pages/design_page/interaction_mode/Interaction.cpp
+    pages/design_page/interaction_mode/Interaction.h
+    pages/design_page/interaction_mode/InteractionMode.h
+    pages/design_page/interaction_mode/PlaceInteraction.cpp
+    pages/design_page/interaction_mode/PlaceInteraction.h
+    pages/design_page/interaction_mode/SelectInteraction.cpp
+    pages/design_page/interaction_mode/SelectInteraction.h
+    pages/design_page/interaction_mode/ViewInteraction.cpp
+    pages/design_page/interaction_mode/ViewInteraction.h
+)
+target_link_libraries(redstone-2d-ui PUBLIC redstone-2d-components Qt::Widgets)
