@@ -1,5 +1,7 @@
 #include "GridModel.h"
 
+#include <algorithm>
+
 #include "core/meta_component/Component.h"
 
 // ─── GridModel ───
@@ -16,6 +18,13 @@ void GridModel::resize(int w, int h)
     m_grid.resize(w);
     for (int x = 0; x < w; ++x)
         m_grid[x].resize(h);
+
+    // 尺寸变化后重建活动列表（覆盖扩大/缩小场景）
+    m_active.clear();
+    for (int x = 0; x < w; ++x)
+        for (int y = 0; y < h; ++y)
+            if (m_grid[x][y])
+                m_active.push_back(m_grid[x][y].get());
 }
 
 bool GridModel::isValid(int x, int y) const
@@ -34,14 +43,30 @@ void GridModel::placeComponent(int x, int y, std::unique_ptr<Component> comp)
 {
     if (!isValid(x, y))
         return;
+
+    // 覆盖放置：旧元件移出活动列表，防止悬挂指针
+    if (m_grid[x][y]) {
+        auto it = std::find(m_active.begin(), m_active.end(), m_grid[x][y].get());
+        if (it != m_active.end())
+            m_active.erase(it);
+    }
+
     m_grid[x][y] = std::move(comp);
+    m_active.push_back(m_grid[x][y].get());
 }
 
 std::unique_ptr<Component> GridModel::removeComponentAt(int x, int y)
 {
     if (!isValid(x, y))
         return nullptr;
-    return std::move(m_grid[x][y]);
+
+    auto comp = std::move(m_grid[x][y]);
+    if (comp) {
+        auto it = std::find(m_active.begin(), m_active.end(), comp.get());
+        if (it != m_active.end())
+            m_active.erase(it);
+    }
+    return comp;
 }
 
 RedstoneSignal GridModel::signalFrom(int x, int y, Direction fromDir) const

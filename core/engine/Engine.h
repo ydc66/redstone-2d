@@ -1,11 +1,13 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <vector>
 
 #include "core/meta_component/RedstoneSignal.h"
 
 class GridModel;
+class Component;
 
 /**
  * @brief 仿真引擎
@@ -29,6 +31,11 @@ private:
     /// 信号快照：cache[x][y][dirIndex] 对应 North=0, East=1, South=2, West=3
     using SignalCache = std::vector<std::vector<std::array<RedstoneSignal, 4>>>;
     SignalCache m_signalCache;
+
+    /// BFS 队列缓冲（成员复用：clear 保留 capacity，热路径零分配）
+    std::vector<Component *> m_bfsQueue;
+    /// 队列头索引（已处理元素数量），避免 pop 移动数据
+    std::size_t m_bfsHead = 0;
 
     /// 遍历全网格，将当前所有方向的输入信号快照到 m_signalCache
     void buildSignalCache(GridModel *grid);

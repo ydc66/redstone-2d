@@ -1,7 +1,5 @@
 #include "Engine.h"
 
-#include <queue>
-
 #include "core/world/World.h"
 #include "core/model/GridModel.h"
 #include "core/meta_component/Component.h"
@@ -15,37 +13,34 @@ void Engine::processTick(World *world)
     GridModel *grid = world->grid();
     if (!grid) return;
 
-    std::queue<Component*> bfsQueue;
+    // 复用 BFS 队列缓冲（clear 保留 capacity，避免每 tick 堆分配）
+    m_bfsQueue.clear();
+    m_bfsHead = 0;
 
     // ═══════════════════════════════════════════════════════════
     //  Phase 1 — 信号源初始化 & 传输线清零
+    //  （稀疏遍历：只走活动元件列表，不扫描空气格）
     // ═══════════════════════════════════════════════════════════
-    for (int x = 0; x < grid->width(); ++x) {
-        for (int y = 0; y < grid->height(); ++y) {
-            auto *comp = grid->cellAt(x, y);
-            if (!comp) continue;
+    for (auto *comp : grid->activeComponents()) {
+        if (comp->isSignalSource()) {
+            // 信号源赋初值
+            comp->setOutputStrength(comp->basePowerLevel());
+        }
 
-            if (comp->isSignalSource()) {
-                // 信号源赋初值
-                comp->setOutputStrength(comp->basePowerLevel());
-            }
-
-            // 所有参与信号传播的元件加入 BFS 队列
-            if (comp->isSignalSource() || comp->isTransceiver()) {
-                bfsQueue.push(comp);
-            } else {
-                // 非参与元件（消费品、装饰等）清零输出，避免残留
-                comp->setOutputStrength(0);
-            }
+        // 所有参与信号传播的元件加入 BFS 队列
+        if (comp->isSignalSource() || comp->isTransceiver()) {
+            m_bfsQueue.push_back(comp);
+        } else {
+            // 非参与元件（消费品、装饰等）清零输出，避免残留
+            comp->setOutputStrength(0);
         }
     }
 
     // ═══════════════════════════════════════════════════════════
     //  Phase 2 — BFS 信号传播
     // ═══════════════════════════════════════════════════════════
-    while (!bfsQueue.empty()) {
-        auto *comp = bfsQueue.front();
-        bfsQueue.pop();
+    while (m_bfsHead < m_bfsQueue.size()) {
+        auto *comp = m_bfsQueue[m_bfsHead++];
 
         int oldOut = comp->outputStrength();
         comp->computeOutput(grid);
@@ -61,7 +56,7 @@ void Engine::processTick(World *world)
 
                 auto *neighbor = grid->cellAt(nx, ny);
                 if (neighbor && neighbor->isTransceiver())
-                    bfsQueue.push(neighbor);
+                    m_bfsQueue.push_back(neighbor);
             }
         }
     }
@@ -73,13 +68,11 @@ void Engine::processTick(World *world)
 
     // ═══════════════════════════════════════════════════════════
     //  Phase 3 — 消费者响应（引擎驱动，传入预计算信号）
+    //  （稀疏遍历：只走活动元件列表）
     // ═══════════════════════════════════════════════════════════
-    for (int x = 0; x < grid->width(); ++x) {
-        for (int y = 0; y < grid->height(); ++y) {
-            auto *comp = grid->cellAt(x, y);
-            if (comp && comp->isConsumer())
-                comp->onTick(m_signalCache[x][y]);
-        }
+    for (auto *comp : grid->activeComponents()) {
+        if (comp->isConsumer())
+            comp->onTick(m_signalCache[comp->x()][comp->y()]);
     }
 }
 

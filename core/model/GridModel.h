@@ -32,10 +32,16 @@ public:
     // ─── 实时信号查询（Phase 2 BFS 传播用，每次计算） ───
     RedstoneSignal signalFrom(int x, int y, Direction fromDir) const;
 
+    // ─── 活动元件列表（Engine 稀疏遍历用） ───
+    const std::vector<Component *> &activeComponents() const { return m_active; }
+
 private:
     int m_width  = 0;
     int m_height = 0;
 
     /// 网格数据以 unique_ptr 自动管理元件生命周期
     std::vector<std::vector<std::unique_ptr<Component>>>  m_grid;
+
+    /// 活动元件列表：place/remove 时同步增删，Engine 遍历避免扫描空气格
+    std::vector<Component *> m_active;
 };
