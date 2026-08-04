@@ -1,6 +1,5 @@
 #include "Engine.h"
 
-#include "core/world/World.h"
 #include "core/model/GridModel.h"
 #include "core/meta_component/Component.h"
 #include "core/meta_component/Direction.h"
@@ -8,9 +7,8 @@
 Engine::Engine() = default;
 Engine::~Engine() = default;
 
-void Engine::processTick(World *world)
+void Engine::processTick(GridModel *grid)
 {
-    GridModel *grid = world->grid();
     if (!grid) return;
 
     // 复用 BFS 队列缓冲（clear 保留 capacity，避免每 tick 堆分配）

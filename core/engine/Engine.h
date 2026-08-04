@@ -14,6 +14,7 @@ class Component;
  *
  * 管理红石电路的 tick 模拟。
  * Phase 1~3 信号传播 + 内部维护信号快照缓存。
+ * 只依赖 GridModel（只读），不感知 World/UI。
  */
 class Engine
 {
@@ -24,8 +25,8 @@ public:
     Engine(const Engine&) = delete;
     Engine& operator=(const Engine&) = delete;
 
-    /// 执行一个 tick
-    void processTick(class World *world);
+    /// 执行一个 tick（只读 grid，不修改网格结构）
+    void processTick(GridModel *grid);
 
 private:
     /// 信号快照：cache[x][y][dirIndex] 对应 North=0, East=1, South=2, West=3
