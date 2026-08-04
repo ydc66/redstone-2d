@@ -10,8 +10,7 @@
 #include "interaction_mode/InteractInteraction.h"
 #include "interaction_mode/DestroyInteraction.h"
 
-#include "components/registration/ComponentRegistry.h"
-#include "core/model/GridModel.h"
+#include "core/world/World.h"
 #include "core/meta_component/Component.h"
 #include "ui/pages/design_page/GridGraphicsScene.h"
 
@@ -23,55 +22,52 @@
 #include <QWidget>
 
 InteractionManager::InteractionManager(QGraphicsView *view,
-                                         GridModel *grid,
+                                         World *world,
                                          GridGraphicsScene *scene,
                                          QObject *parent)
     : QObject(parent)
     , m_view(view)
-    , m_grid(grid)
+    , m_world(world)
     , m_scene(scene)
 {
     /// 创建各种交互模式实例
-    m_interactions[static_cast<int>(InteractionMode::View)]     = new ViewInteraction(grid, scene, view, this);
-    m_interactions[static_cast<int>(InteractionMode::Select)]   = new SelectInteraction(grid, scene, view, this);
-    m_interactions[static_cast<int>(InteractionMode::Place)]    = new PlaceInteraction(grid, scene, view, this);
-    m_interactions[static_cast<int>(InteractionMode::Interact)] = new InteractInteraction(grid, scene, view, this);
-    m_interactions[static_cast<int>(InteractionMode::Destroy)]  = new DestroyInteraction(grid, scene, view, this);
+    m_interactions[static_cast<int>(InteractionMode::View)]     = new ViewInteraction(world, scene, view, this);
+    m_interactions[static_cast<int>(InteractionMode::Select)]   = new SelectInteraction(world, scene, view, this);
+    m_interactions[static_cast<int>(InteractionMode::Place)]    = new PlaceInteraction(world, scene, view, this);
+    m_interactions[static_cast<int>(InteractionMode::Interact)] = new InteractInteraction(world, scene, view, this);
+    m_interactions[static_cast<int>(InteractionMode::Destroy)]  = new DestroyInteraction(world, scene, view, this);
 
-    // ─── 放置信号 → 创建元件并放入网格 ───
+    // ─── 放置信号 → World 编辑入口 ───
     auto *place = static_cast<PlaceInteraction *>(
         m_interactions[static_cast<int>(InteractionMode::Place)]);
     connect(place, &PlaceInteraction::placeRequested,
             this, [this, place](int x, int y, const QString &id) {
-        auto comp = ComponentRegistry::instance().create(id, x, y);
-        if (comp) {
-            comp->setFacing(place->currentFacing());
-            m_grid->placeComponent(x, y, std::move(comp));
-            m_scene->update();
-        }
+        m_world->placeComponent(x, y, id, place->currentFacing());
     });
 
-    // ─── 破坏信号 → 从网格移除并释放 ───
+    // ─── 破坏信号 → World 编辑入口 ───
     auto *destroy = static_cast<DestroyInteraction *>(
         m_interactions[static_cast<int>(InteractionMode::Destroy)]);
     connect(destroy, &DestroyInteraction::componentDestroyed,
             this, [this](const QString &/*ignored*/, int x, int y) {
-        auto comp = m_grid->removeComponentAt(x, y);
-        if (comp) {
-            m_scene->update();
-        }
+        m_world->removeComponentAt(x, y);
     });
 
-    // ─── 交互信号 → 委托给元件内部 onInteract() ───
+    // ─── 交互信号 → World 编辑入口 ───
     auto *interact = static_cast<InteractInteraction *>(
         m_interactions[static_cast<int>(InteractionMode::Interact)]);
     connect(interact, &InteractInteraction::interactTriggered,
             this, [this](const QString &/*id*/, int x, int y) {
-        auto *comp = m_grid->cellAt(x, y);
-        if (!comp) return;
-        comp->onInteract();   // SolidBlockBehavior 会切换材质
-        m_scene->update();
+        m_world->interactAt(x, y);
     });
+
+    // ─── World 编辑信号 → 场景刷新（统一刷新入口，替代手动 update） ───
+    connect(m_world, &World::componentPlaced, this,
+            [this](int, int) { if (m_scene) m_scene->update(); });
+    connect(m_world, &World::componentRemoved, this,
+            [this](int, int) { if (m_scene) m_scene->update(); });
+    connect(m_world, &World::componentInteracted, this,
+            [this](int, int) { if (m_scene) m_scene->update(); });
 }
 
 void InteractionManager::install()

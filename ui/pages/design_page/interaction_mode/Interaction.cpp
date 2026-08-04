@@ -11,10 +11,10 @@
 #include <QKeyEvent>
 #include <QWheelEvent>
 
-Interaction::Interaction(GridModel *grid, GridGraphicsScene *scene,
+Interaction::Interaction(World *world, GridGraphicsScene *scene,
                          QGraphicsView *view, QObject *parent)
     : QObject(parent)
-    , m_grid(grid)
+    , m_world(world)
     , m_scene(scene)
     , m_view(view)
 {

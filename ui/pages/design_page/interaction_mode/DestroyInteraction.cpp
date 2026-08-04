@@ -5,16 +5,16 @@
 
 #include "DestroyInteraction.h"
 
-#include "core/model/GridModel.h"
+#include "core/world/World.h"
 #include "core/meta_component/Component.h"
 
 void DestroyInteraction::onLeftPress(const QPointF &scenePos)
 {
     const QPoint grid = scenePosToGrid(scenePos);
-    if (!m_grid || !m_grid->isValid(grid.x(), grid.y()))
+    if (!m_world || !m_world->isValid(grid.x(), grid.y()))
         return;
 
-    auto *comp = m_grid->cellAt(grid.x(), grid.y());
+    auto *comp = m_world->cellAt(grid.x(), grid.y());
     if (!comp)
         return;
 

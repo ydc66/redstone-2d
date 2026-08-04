@@ -7,7 +7,7 @@
 #include "SelectInteraction.h"
 
 #include "components/registration/ComponentRegistry.h"
-#include "core/model/GridModel.h"
+#include "core/world/World.h"
 #include "core/meta_component/Component.h"
 #include "ui/pages/design_page/GridGraphicsScene.h"
 
@@ -33,10 +33,10 @@ SelectInteraction::~SelectInteraction()
 void SelectInteraction::onLeftPress(const QPointF &scenePos)
 {
     const QPoint grid = scenePosToGrid(scenePos);
-    if (!m_grid || !m_grid->isValid(grid.x(), grid.y()))
+    if (!m_world || !m_world->isValid(grid.x(), grid.y()))
         return;
 
-    auto *comp = m_grid->cellAt(grid.x(), grid.y());
+    auto *comp = m_world->cellAt(grid.x(), grid.y());
 
     if (m_selectedId.isEmpty()) {
         // ─── 无选中 → 尝试选中 ───
@@ -59,11 +59,10 @@ void SelectInteraction::onLeftPress(const QPointF &scenePos)
             updateMoveGhost(scenePos);
             emit componentSelected(m_selectedId);
         } else if (grid != m_selectedGrid) {
-            // 点击空格子 → 移动
-            auto moved = m_grid->removeComponentAt(
-                m_selectedGrid.x(), m_selectedGrid.y());
-            if (moved) {
-                m_grid->placeComponent(grid.x(), grid.y(), std::move(moved));
+            // 点击空格子 → 移动（World 原子收口：remove + place + 回滚）
+            if (m_world->moveComponent(
+                    m_selectedGrid.x(), m_selectedGrid.y(),
+                    grid.x(), grid.y())) {
                 m_selectedGrid = grid;
                 updateHighlight();
                 renderMoveGhostPixmap();
@@ -182,8 +181,8 @@ void SelectInteraction::updateMoveGhost(const QPointF &scenePos)
 
     const QPoint grid = scenePosToGrid(scenePos);
     const bool canMove = (grid != m_selectedGrid)
-                      && m_grid && m_grid->isValid(grid.x(), grid.y())
-                      && !m_grid->cellAt(grid.x(), grid.y());
+                      && m_world && m_world->isValid(grid.x(), grid.y())
+                      && !m_world->cellAt(grid.x(), grid.y());
 
     if (!canMove) {
         if (m_moveGhostItem)
@@ -230,8 +229,8 @@ void SelectInteraction::renderMoveGhostPixmap()
 
     // 获取实际元件的 facing（来自已放置的实例）
     Direction actualFacing = Direction::North;
-    if (m_grid && m_grid->isValid(m_selectedGrid.x(), m_selectedGrid.y())) {
-        if (auto *placed = m_grid->cellAt(m_selectedGrid.x(), m_selectedGrid.y()))
+    if (m_world && m_world->isValid(m_selectedGrid.x(), m_selectedGrid.y())) {
+        if (auto *placed = m_world->cellAt(m_selectedGrid.x(), m_selectedGrid.y()))
             actualFacing = placed->facing();
     }
 

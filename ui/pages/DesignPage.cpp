@@ -31,7 +31,7 @@ DesignPage::DesignPage(QWidget *parent)
 {
     // 先创建世界（内部包含网格模型，画布初始化时需要）
     m_world = std::make_unique<World>();
-    m_world->grid()->resize(16, 16);
+    m_world->resizeGrid(16, 16);
 
     setupUI();
     initGridModel();
@@ -95,7 +95,7 @@ void DesignPage::initGridModel()
     // ─── 初始化交互管理器 ───
     if (auto *gridScene = m_editCanvas->scene()) {
         m_interactionMgr = new InteractionManager(
-            m_editCanvas->view(), m_world->grid(), gridScene, this);
+            m_editCanvas->view(), m_world.get(), gridScene, this);
         m_interactionMgr->install();
 
         // ─── 元件面板选择 → 放置模式激活元件 ───

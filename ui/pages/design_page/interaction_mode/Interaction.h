@@ -12,7 +12,7 @@
 #include <QCursor>
 #include <QPointF>
 
-class GridModel;
+class World;
 class GridGraphicsScene;
 class QGraphicsView;
 class QKeyEvent;
@@ -32,12 +32,12 @@ class Interaction : public QObject
 public:
     /**
      * @brief   构造函数
-     * @param   grid   网格模型
+     * @param   world  世界（唯一编辑入口，UI 不直接碰 GridModel）
      * @param   scene  网格场景
      * @param   view   图形视图
      * @param   parent 父 QObject 对象
      */
-    explicit Interaction(GridModel *grid, GridGraphicsScene *scene,
+    explicit Interaction(World *world, GridGraphicsScene *scene,
                          QGraphicsView *view, QObject *parent = nullptr);
 
     /** @brief 虚析构函数（默认） */
@@ -87,8 +87,8 @@ protected:
      */
     QPoint scenePosToGrid(const QPointF &scenePos) const;
 
-    /** @brief 网格数据模型 */
-    GridModel        *m_grid;
+    /** @brief 世界（编辑/查询统一入口） */
+    World            *m_world;
     /** @brief 网格场景 */
     GridGraphicsScene *m_scene;
     /** @brief 图形视图 */

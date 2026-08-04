@@ -6,7 +6,7 @@
 
 #include <QObject>
 
-class GridModel;
+class World;
 class GridGraphicsScene;
 class QGraphicsView;
 class QEvent;
@@ -23,7 +23,7 @@ class InteractionManager : public QObject
 
 public:
     explicit InteractionManager(QGraphicsView *view,
-                                 GridModel *grid,
+                                 World *world,
                                  GridGraphicsScene *scene,
                                  QObject *parent = nullptr);
 
@@ -57,7 +57,7 @@ protected:
 
 private:
     QGraphicsView     *m_view;
-    GridModel         *m_grid;
+    World             *m_world;
     GridGraphicsScene *m_scene;
     
     /// 当前模式

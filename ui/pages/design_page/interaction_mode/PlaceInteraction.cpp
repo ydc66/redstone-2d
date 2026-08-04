@@ -7,7 +7,7 @@
 #include "PlaceInteraction.h"
 
 #include "components/registration/ComponentRegistry.h"
-#include "core/model/GridModel.h"
+#include "core/world/World.h"
 #include "core/meta_component/Component.h"
 #include "ui/pages/design_page/GridGraphicsScene.h"
 
@@ -92,9 +92,9 @@ QCursor PlaceInteraction::cursor() const
  */
 bool PlaceInteraction::canPlaceAt(int gx, int gy) const
 {
-    if (!m_grid || !m_grid->isValid(gx, gy))
+    if (!m_world || !m_world->isValid(gx, gy))
         return false;
-    return !m_grid->cellAt(gx, gy);
+    return !m_world->cellAt(gx, gy);
 }
 
 /**
