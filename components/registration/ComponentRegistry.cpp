@@ -1,6 +1,8 @@
 #include "ComponentRegistry.h"
 #include "core/meta_component/Component.h"
 
+#include <QDebug>
+
 // ═══════════════════════════════════════════════════════════
 //  单例：静态局部变量，C++11 起线程安全
 // ═══════════════════════════════════════════════════════════
@@ -19,15 +21,19 @@ void ComponentRegistry::registerType(
     const QString &id, const QString &name,
     const QString &group, FactoryFunc factory)
 {
+    // 重复 ID 防护：元件 ID 是全局契约，冲突即程序员错误，拒绝注册并告警
+    if (m_idToIndex.contains(id)) {
+        qWarning() << "[ComponentRegistry] 重复注册元件 ID:" << id << "，已忽略";
+        return;
+    }
+
     Entry entry;
-    entry.meta.numericId  = m_nextNumericId++;
     entry.meta.id         = id;
     entry.meta.name       = name;
     entry.meta.group      = group;
     entry.factory         = std::move(factory);
 
     m_idToIndex[id]       = m_entries.size();
-    m_numericIdToIndex[entry.meta.numericId] = m_entries.size();
     m_entries.append(std::move(entry));
 
     if (!m_categoriesInOrder.contains(group)) {
@@ -44,15 +50,6 @@ ComponentRegistry::find(const QString &id) const
 {
     auto it = m_idToIndex.find(id);
     if (it == m_idToIndex.end())
-        return nullptr;
-    return &m_entries[it.value()].meta;
-}
-
-const ComponentRegistry::ComponentMeta*
-ComponentRegistry::findByNumericId(int numericId) const
-{
-    auto it = m_numericIdToIndex.find(numericId);
-    if (it == m_numericIdToIndex.end())
         return nullptr;
     return &m_entries[it.value()].meta;
 }
@@ -91,15 +88,6 @@ ComponentRegistry::create(const QString &id, int x, int y) const
     if (comp)
         comp->setRegistryId(id);
     return comp;
-}
-
-std::unique_ptr<Component>
-ComponentRegistry::createByNumericId(int numericId, int x, int y) const
-{
-    auto it = m_numericIdToIndex.find(numericId);
-    if (it == m_numericIdToIndex.end())
-        return nullptr;
-    return m_entries[it.value()].factory(x, y);
 }
 
 // ═══════════════════════════════════════════════════════════
