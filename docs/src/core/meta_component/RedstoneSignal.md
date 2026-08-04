@@ -53,8 +53,47 @@ graph LR
 
 无专门测试文件：结构体为字段级数据载体，其语义（isStrong 决定传输激活、direction 指向语义、聚合 max/取或规则）通过引擎集成测试与具体元件（SolidBlock、RedstoneDust 等）测试覆盖。
 
-## 7. 变更历史
+## 7. 未来的重构方向：取消 direction 字段
+
+**目标**：RedstoneSignal 精简为两字段（`strength` + `isStrong`），方向语义完全由承载容器与元件接口决定，结构体不再携带方向。
+
+### 7.1 重构依据（现状核查）
+
+- **direction 是死字段**：全项目仅 1 处写入（`GridModel::signalFrom` 的 `.direction = signalDir`），0 处读取——写入后从未被任何消费方访问
+- **方向信息已有三个承载者**，不依赖字段：
+  - `signalFrom(x, y, fromDir)` 的 `fromDir` 参数——调用方传方向、自己知道方向
+  - `onTick(sigArray)` 的数组下标——`North=0, East=1, South=2, West=3` 即 Direction 枚举值
+  - 元件端口接口 `canInputFrom` / `canOutputTo`——以 RelDir 相对方向声明，内部 `toRelativeDir` 转换，决定输入输出方向
+- **输入输出的方向由元件接口决定**：消费方（SolidBlock、RedstoneDust、RedstoneTorchBase、RedstoneLamp 等）一律先 `canInputFrom(dir)` 校验端口，再按下标/参数取信号；方向语义属于调用约定，不属于信号数据本身
+
+### 7.2 重构范围（改动点清单）
+
+| 文件 | 改动 |
+|---|---|
+| `core/meta_component/RedstoneSignal.h` | 删除 `direction` 字段，注释同步（改为两字段说明） |
+| `core/model/GridModel.cpp` `signalFrom` | 删除 `.direction = signalDir` 赋值，保留 strength / isStrong |
+| `core/meta_component/Component.h` | `onTick` 注释补充"方向由数组下标承载" |
+| `core/engine/Engine.h` | SignalCache 注释微调（可选，现注释已说明下标布局） |
+| 本文档 + [Direction.md](./Direction.md) 使用约定节 | 同步删除 direction 相关表述 |
+
+**测试影响**：无——direction 无消费方，删除字段不触碰任何断言；现有单元/场景测试全部保持通过（预期零改动）。
+
+### 7.3 未来影响
+
+**正向收益**：
+- 结构体体积缩减，SignalCache 快照内存占用降低（POD 更紧凑）
+- 方向语义单一来源：由容器下标 / 接口参数决定，消除"字段值与下标不一致"的双源漂移风险
+- 与"元件内部信号缓存"演进方向一致：若未来信号缓存沉入元件内部，方向天然由元件端口系统承载，字段更无用武之地
+
+**风险与注意**：
+- **接口必须显式携带方向（唯一硬性约定）**：删除字段后，RedstoneSignal 脱离下标/参数上下文即无方向。凡是新写"传入/传出 RedstoneSignal"的接口，必须同时携带方向（参数或数组下标），否则方向静默丢失（编译期不报错，属运行时语义约定）——需在代码注释中固化"方向由上下文承载"
+- **方向 ≠ 来源**：RedstoneDust 的弱充能规则需要"信号来源是否实心方块"，现状是 `signalFrom` 后再二次查询邻居 `isSolid()`。若未来元件对来源有更多需求（来源类型 / 来源元件引用），应扩展查询接口，而非恢复 direction 字段——字段本来就提供不了来源信息
+- **调试可读性小幅下降**：SignalCache 裸数组调试时从下标还原方向需 `static_cast<Direction>(idx)` 一行代码；下标契约（North=0..West=3）不变，可接受
+- **确认无影响**：`signalFrom` 签名不变（`fromDir` 已携带方向）；`canOutputTo(signalDir)` 校验行保留（与字段无关）；全项目无 `.direction` 读取，测试零改动；持久化只存元件状态、不存信号缓存，无序列化影响
+
+## 8. 变更历史
 
 | 日期 | 变更 |
 |---|---|
+| 2026-08-04 | 补充"未来的重构方向"节：取消 direction 字段（死字段，方向由下标/接口承载），含重构范围与影响分析 |
 | 2026-08-04 | 首次成文，按当前三字段现状（strength / direction / isStrong）记录语义与使用约定 |
