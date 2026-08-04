@@ -9,12 +9,16 @@
 set(UNIT_TEST_SOURCES
     core/meta_component/test_Direction.cpp   # 方向系统：四方向取余、toRelativeDir/toAbsoluteDir 互逆
     core/meta_component/test_WorldObject.cpp # 网格对象基类：占位、朝向旋转、渲染模板方法
-    components/test/test_UniversalProbe.cpp  # 万能探针：三角色、强弱充能配置、历史记录
+    components/test/test_UniversalProbe.cpp  # 万能探针：准确信号源、按方向取信号
+    components/transmission/test_RedstoneDust.cpp   # 红石粉：衰减、端口方向性、弱充能过滤
+    components/transmission/test_RedstoneTorch.cpp  # 火把：延迟状态机、永亮/附着销毁
+    components/blocks/test_SolidBlock.cpp    # 实心方块：不衰减传导、强弱充能规则、火把邻居过滤
+    components/blocks/test_DirectionalBlock.cpp  # 方向箭头方块：朝向旋转交互
+    components/sources/test_Lever.cpp        # 拉杆：交互切换、强充能 15 输出
+    components/sources/test_RedstoneBlock.cpp # 红石块：恒定强充能 15
+    components/mechanical/test_RedstoneLamp.cpp # 红石灯：消费者响应（亮/灭）
     # core/meta_component/test_Component.cpp   # 组件基类：facing、canInputFrom/canOutputTo 端口映射
     # core/model/test_GridModel.cpp            # 网格模型：放置/移除/越界/resize
-    # components/transmission/test_RedstoneDust.cpp   # 红石粉：衰减链、十字/一字导通
-    # components/transmission/test_RedstoneTorch.cpp  # 火把：延迟状态机、Back 触发防自激
-    # components/blocks/test_SolidBlock.cpp    # 实心方块：混合充能、强充能直连
 )
 
 foreach(test_src IN LISTS UNIT_TEST_SOURCES)
