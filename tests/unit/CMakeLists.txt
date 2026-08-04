@@ -9,6 +9,7 @@
 set(UNIT_TEST_SOURCES
     core/meta_component/test_Direction.cpp   # 方向系统：四方向取余、toRelativeDir/toAbsoluteDir 互逆
     core/meta_component/test_WorldObject.cpp # 网格对象基类：占位、朝向旋转、渲染模板方法
+    components/test/test_UniversalProbe.cpp  # 万能探针：三角色、强弱充能配置、历史记录
     # core/meta_component/test_Component.cpp   # 组件基类：facing、canInputFrom/canOutputTo 端口映射
     # core/model/test_GridModel.cpp            # 网格模型：放置/移除/越界/resize
     # components/transmission/test_RedstoneDust.cpp   # 红石粉：衰减链、十字/一字导通
