@@ -2,13 +2,12 @@
 
 #include <array>
 
-#include "Direction.h"
+#include "core/meta_component/WorldObject.h"
 #include "core/meta_component/RedstoneSignal.h"
 
 #include <QList>
 #include <QString>
 
-class QPainter;
 class GridModel;
 
 /// 方块类型，决定了物理交互行为
@@ -20,12 +19,13 @@ enum class Category
 };
 
 /**
- * @brief 元件抽象基类
+ * @brief 红石元件抽象基类
  *
- * 集数据与策略于一体，是所有方块/元件的公共基类。
- * 子类必须实现 paint() 和 category()，可按需重写 onInteract() / onTick() / isPushable() / basePowerLevel()。
+ * 继承 WorldObject（网格占位 + 朝向 + 渲染），在此之上提供红石逻辑：
+ * 物理属性、端口系统、信号系统、交互与注册 ID。
+ * 子类必须实现 paintContent() 和 category()，可按需重写 onInteract() / onTick() / isPushable() / basePowerLevel()。
  */
-class Component
+class Component : public WorldObject
 {
 public:
     Component(int x, int y,
@@ -34,14 +34,6 @@ public:
               QList<RelDir> outputPorts = {});
 
     virtual ~Component() = default;
-
-    // ─── 位置 / 朝向 ───
-    int x()       const { return m_x; }
-    int y()       const { return m_y; }
-    void setPosition(int x, int y) { m_x = x; m_y = y; }
-
-    Direction facing()      const { return m_facing; }
-    void setFacing(Direction d)    { m_facing = d; }
 
     // ─── 物理属性（子类自声明） ───
     virtual Category category()         const = 0;
@@ -79,24 +71,12 @@ public:
     /// Phase 2 BFS：根据邻居信号重新计算自身输出
     virtual void computeOutput(GridModel *grid);
 
-    // ─── 渲染（Template Method：基类处理朝向旋转，子类只画朝北版本） ───
-    void paint(QPainter *painter, int cellSize) const;
-
     // ─── 注册 ID（关联 ComponentRegistry 中的 entry） ───
     const QString& registryId() const { return m_registryId; }
     void setRegistryId(const QString &id) { m_registryId = id; }
 
-protected:
-    /// 子类实现此方法，按朝北方向绘制元件。基类 paint() 会根据 m_facing 旋转画布后再调用此方法。
-    virtual void paintContent(QPainter *painter, int cellSize) const = 0;
-
-    /// 朝向 → 旋转角度（顺时针），用于 paint() 中的画布旋转
-    static int directionToAngle(Direction d) noexcept;
-
 private:
-    int             m_x, m_y;
     QString         m_registryId;
-    Direction       m_facing        = Direction::North;
 
     QList<RelDir>   m_inputPorts;
     QList<RelDir>   m_outputPorts;

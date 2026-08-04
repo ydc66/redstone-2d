@@ -7,6 +7,8 @@ add_library(redstone-2d-core STATIC
     meta_component/Component.h
     meta_component/Direction.h
     meta_component/RedstoneSignal.h
+    meta_component/WorldObject.cpp
+    meta_component/WorldObject.h
     model/GridModel.cpp
     model/GridModel.h
     world/World.cpp
