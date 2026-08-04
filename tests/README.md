@@ -6,14 +6,34 @@
 
 | 子目录 | 定位 | 未来示例 |
 |--------|------|----------|
-| `unit/` | **模块单元测试**：单个类/模块的行为验证 | Direction 方向运算、GridModel 增删查、单个元件（RedstoneDust / RedstoneTorch / SolidBlock） |
+| `unit/` | **模块单元测试**：单个类/模块的行为验证；**内部镜像源码目录结构**（见下） | core/meta_component/ 的 Direction、core/model/ 的 GridModel、components/ 各元件 |
 | `scenario/` | **多元件场景测试**：真实电路集成行为 | 反相器、RS 锁存器、脉冲链、长链信号传播、引擎三阶段全链路 |
 | `custom/` | **自定义场景测试**：特定布局/存档驱动的验证 | 读入存档布局 → 断言信号状态（未来存档功能就绪后更便捷） |
 
+### unit/ 镜像源码目录结构
+
+`tests/unit/` 内部与项目根源码目录**一一对应**，被测文件在哪，测试文件就在哪：
+
+```
+tests/unit/
+├── core/
+│   ├── meta_component/    test_Direction.cpp、test_Component.cpp
+│   ├── model/             test_GridModel.cpp
+│   └── engine/            test_Engine.cpp
+└── components/
+    ├── blocks/            test_SolidBlock.cpp
+    ├── transmission/      test_RedstoneDust.cpp、test_RedstoneTorch.cpp
+    ├── sources/           test_Lever.cpp
+    └── ...
+```
+
+> 物理目录同步建立（新建文件时创建镜像子目录）；`unit/CMakeLists.txt` 的源列表用**相对路径**（`core/meta_component/test_Direction.cpp`）显式声明。
+
 ## 二、命名与注册约定
 
-- 测试文件：`tst_<主题>.cpp`，一个文件一个 QtTest 类，使用 `QTEST_GUILESS_MAIN`（纯逻辑，无需 QApplication）
-- **测试名 = 文件名**：`tst_Direction.cpp` → 测试名 `tst_Direction`，由 `rsd_add_test()` 统一注册
+- 测试文件：`test_<主题>.cpp`，一个文件一个 QtTest 类，使用 `QTEST_GUILESS_MAIN`（纯逻辑，无需 QApplication）
+- **测试名 = 文件名**：`test_Direction.cpp` → 测试名 `test_Direction`，由 `rsd_add_test()` 统一注册
+- 前缀说明：Qt 向导默认 `tst_`，本项目统一用 `test_`（纯命名偏好，无技术约束）
 - 每个子目录的 `CMakeLists.txt` 显式列出本类测试文件（**不用 GLOB**）
 
 ### 最小模板
@@ -22,21 +42,21 @@
 #include <QtTest>
 #include "core/model/GridModel.h"
 
-class tst_Example : public QObject {
+class test_Example : public QObject {
     Q_OBJECT
 private slots:
     void init() { /* 每个用例执行前调用，可放 World 重建 */ }
     void exampleCase() { QVERIFY(true); }
 };
 
-QTEST_GUILESS_MAIN(tst_Example)
-#include "tst_Example.moc"
+QTEST_GUILESS_MAIN(test_Example)
+#include "test_Example.moc"
 ```
 
 ## 三、如何新增一个测试
 
-1. 在对应子目录新建 `tst_xxx.cpp`（模板见上）
-2. 把文件名加入该子目录 `CMakeLists.txt` 的源列表
+1. 新建 `test_xxx.cpp`（模板见上），**存放于镜像源码路径的子目录**（如 `unit/core/meta_component/test_Direction.cpp`）
+2. 把相对路径（`core/meta_component/test_Direction.cpp`）加入 `unit/CMakeLists.txt` 的源列表
 3. 重新配置 + 构建 + 运行：
 
 ```powershell
@@ -49,7 +69,7 @@ ctest --test-dir <ROOT>\build\Desktop_Qt_6_11_1_MinGW_64_bit-Debug --output-on-f
 
 ```powershell
 cd <ROOT>\build\Desktop_Qt_6_11_1_MinGW_64_bit-Debug
-.\tst_xxx.exe -o result.log
+.\test_xxx.exe -o result.log
 Get-Content result.log
 ```
 
@@ -71,7 +91,7 @@ ctest --test-dir <ROOT>\build\Desktop_Qt_6_11_1_MinGW_64_bit-Debug\tests\custom 
 
 ```cmake
 # scenario/CMakeLists.txt：给性能用例打 perf 标签
-rsd_add_test(tst_Performance.cpp "perf")   # 实际标签：scenario;perf
+rsd_add_test(test_Performance.cpp "perf")   # 实际标签：scenario;perf
 ```
 
 ```powershell

@@ -12,10 +12,10 @@ get_filename_component(TOOLCHAIN_BIN_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
 set(TEST_PATH_PREFIX "${QT6_BIN_DIR};${TOOLCHAIN_BIN_DIR}")
 string(REPLACE ";" "\\;" TEST_PATH_PREFIX "${TEST_PATH_PREFIX}")
 
-# 统一注册函数：文件名 tst_xxx.cpp → 测试名 tst_xxx
+# 统一注册函数：文件名 test_xxx.cpp → 测试名 test_xxx
 # 供各子目录 CMakeLists 调用；测试只链 components（PUBLIC 传播 core），不依赖 UI
 # 标签：自动打上"所在子目录名"（unit/scenario/custom），可附加标签，例如：
-#   rsd_add_test(tst_Performance.cpp "perf")  → 标签 scenario;perf
+#   rsd_add_test(test_Performance.cpp "perf")  → 标签 scenario;perf
 #   ctest -L perf 只跑性能；ctest -LE perf 日常排除性能
 function(rsd_add_test test_src)
     get_filename_component(auto_label ${CMAKE_CURRENT_SOURCE_DIR} NAME)
