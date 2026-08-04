@@ -17,7 +17,7 @@ RedstoneTorchWall::RedstoneTorchWall(int x, int y)
 void RedstoneTorchWall::computeOutput(GridModel *grid)
 {
     // ─── 附着校验 ───
-    Direction attachDir = resolveDir(RelDir::Back, facing());
+    Direction attachDir = toAbsoluteDir(RelDir::Back, facing());
     int ax = x() + dx(attachDir), ay = y() + dy(attachDir);
     if (grid->isValid(ax, ay)) {
         auto *attached = grid->cellAt(ax, ay);
